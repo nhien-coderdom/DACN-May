@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  name     String?
+  orders   Order[]
+  phone    String
+  address  String?
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Float
+  description String?
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  toppings    ProductTopping[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model Topping {
+  id       Int       @id @default(autoincrement())
+  name     String
+  price    Float     
+  products ProductTopping[]
+}
+
+model ProductTopping {
+  productId Int
+  toppingId Int
+
+  product Product @relation(fields: [productId], references: [id])
+  topping Topping @relation(fields: [toppingId], references: [id])
+
+  @@id([productId, toppingId]) // khóa chính kép
+}
+
+
+model Order {
+  id      Int    @id @default(autoincrement())
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id])
+  items   OrderItem[]
+  total   Float
+  status  OrderStatus @default(PENDING)
+  phone   String
+  address String
+
+  createdAt DateTime @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPING
+  COMPLETED
+  CANCELLED
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity Int @default(1)
+
+  productName String  
+  basePrice   Float    
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  toppings OrderItemTopping[]
+}
+
+model OrderItemTopping {
+  id          Int    @id @default(autoincrement())
+  orderItemId Int
+
+  toppingName String  
+  toppingPrice Float 
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
+}
