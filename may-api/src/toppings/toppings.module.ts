@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ToppingsController } from './toppings.controller';
-import { ToppingsService } from './toppings.service';
+import { ToppingsController } from './toppings.controller.js';
+import { ToppingsService } from './toppings.service.js';
 
 @Module({
   controllers: [ToppingsController],

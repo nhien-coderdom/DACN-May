@@ -1,76 +1,149 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-
-
-
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
-  name     String?
-  orders   Order[]
-  phone    String
-  address  String?
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  password     String
+  name         String?
+  phone        String     @unique
+  address      String?
+  createdAt    DateTime   @default(now())
+  deletedAt    DateTime?
+  isDeleted    Boolean    @default(false)
+  loyaltyPoint Int        @default(0)
+  role         UserRole   @default(CUSTOMER)
+  totalOrders  Int        @default(0)
+  totalSpent   Float      @default(0)
+  updatedAt    DateTime   @updatedAt
+  orders       Order[]
+  orderLogs    OrderLog[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int              @id @default(autoincrement())
   name        String
   price       Float
   description String?
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  imageId     String?
+  imageUrl    String?
+  isDeleted   Boolean          @default(false)
+  category    Category         @relation(fields: [categoryId], references: [id])
   toppings    ProductTopping[]
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
-  name     String
-  products Product[]
+  id        Int        @id @default(autoincrement())
+  name      String
+  createdAt DateTime   @default(now())
+  order     Int        @default(0)
+  parentId  Int?
+  slug      String     @unique
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  isDeleted Boolean    @default(false)
+  parent    Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryHierarchy")
+  products  Product[]
 }
 
 model Topping {
-  id       Int       @id @default(autoincrement())
+  id       Int              @id @default(autoincrement())
   name     String
-  price    Float     
+  price    Float
   products ProductTopping[]
 }
 
 model ProductTopping {
   productId Int
   toppingId Int
+  product   Product @relation(fields: [productId], references: [id])
+  topping   Topping @relation(fields: [toppingId], references: [id])
 
-  product Product @relation(fields: [productId], references: [id])
-  topping Topping @relation(fields: [toppingId], references: [id])
-
-  @@id([productId, toppingId]) // khóa chính kép
+  @@id([productId, toppingId])
 }
 
-
 model Order {
-  id      Int    @id @default(autoincrement())
-  userId  Int
-  user    User   @relation(fields: [userId], references: [id])
-  items   OrderItem[]
-  total   Float
-  status  OrderStatus @default(PENDING)
-  phone   String
-  address String
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  total       Float
+  status      OrderStatus @default(PENDING)
+  phone       String
+  address     String
+  createdAt   DateTime    @default(now())
+  deletedAt   DateTime?
+  earnedPoint Int         @default(0)
+  isDeleted   Boolean     @default(false)
+  updatedAt   DateTime    @updatedAt
+  usedPoint   Int         @default(0)
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+  logs        OrderLog[]
+  payments    Payment[]
+}
 
-  createdAt DateTime @default(now())
+model OrderItem {
+  id          Int                @id @default(autoincrement())
+  orderId     Int
+  productId   Int
+  quantity    Int                @default(1)
+  productName String
+  basePrice   Float
+  order       Order              @relation(fields: [orderId], references: [id])
+  toppings    OrderItemTopping[]
+}
+
+model OrderItemTopping {
+  id           Int       @id @default(autoincrement())
+  orderItemId  Int
+  toppingName  String
+  toppingPrice Float
+  orderItem    OrderItem @relation(fields: [orderItemId], references: [id])
+}
+
+model OrderLog {
+  id          Int         @id @default(autoincrement())
+  orderId     Int
+  status      OrderStatus
+  note        String?
+  updatedById Int?
+  createdAt   DateTime    @default(now())
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  updatedBy   User?       @relation(fields: [updatedById], references: [id])
+}
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  orderId       Int
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  amount        Float
+  transactionId String?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+enum LoyaltyTier {
+  NORMAL
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  CUSTOMER
 }
 
 enum OrderStatus {
@@ -81,25 +154,17 @@ enum OrderStatus {
   CANCELLED
 }
 
-model OrderItem {
-  id        Int      @id @default(autoincrement())
-  orderId   Int
-  productId Int
-  quantity Int @default(1)
-
-  productName String  
-  basePrice   Float    
-
-  order   Order   @relation(fields: [orderId], references: [id])
-  toppings OrderItemTopping[]
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  MOMO
+  VNPAY
+  STRIPE
 }
 
-model OrderItemTopping {
-  id          Int    @id @default(autoincrement())
-  orderItemId Int
-
-  toppingName String  
-  toppingPrice Float 
-
-  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
 }
