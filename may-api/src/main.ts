@@ -6,9 +6,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
   });
+
   // Bật validate DTO
   app.useGlobalPipes(
     new ValidationPipe({

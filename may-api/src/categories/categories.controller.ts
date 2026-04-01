@@ -9,6 +9,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service.js';
+import { CreateCategoryDto } from './dto/create-category.dto.js';
+import { UpdateCategoryDto } from './dto/update-category.dto.js';
 
 @Controller('categories')
 export class CategoriesController {
@@ -17,12 +19,7 @@ export class CategoriesController {
   @Post()
   create(
     @Body(ValidationPipe)
-    body: {
-      name: string;
-      slug: string;
-      order?: number;
-      parentId?: number;
-    },
+    body: CreateCategoryDto,
   ) {
     return this.categoriesService.create(body);
   }
@@ -41,12 +38,7 @@ export class CategoriesController {
   update(
     @Param('id') id: string,
     @Body(ValidationPipe)
-    body: {
-      name?: string;
-      slug?: string;
-      order?: number;
-      parentId?: number | null;
-    },
+    body: UpdateCategoryDto,
   ) {
     return this.categoriesService.update(Number(id), body);
   }
