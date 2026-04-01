@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 import Login from "@/pages/auth/Login"
+import { ProtectedRoute } from "@/pages/auth/components"
 import Dashboard from "@/pages/dashboard/Dashboard"
 import { CategoriesList } from "@/pages/categories/components"
 
 import MainLayout from "@/layouts/MainLayout"
-import ProtectedRoute from "@/components/ProtectedRoute"
 
 export default function AppRoutes() {
   return (

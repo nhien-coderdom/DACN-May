@@ -1,23 +1,22 @@
-import { Navigate } from "react-router-dom"
-import { useAuthStore } from "@/stores/authStore"
+import { Navigate } from 'react-router-dom'
+import { useAuthStore } from '../stores/authStore'
 
-interface Props {
+interface ProtectedRouteProps {
   children: React.ReactNode
   roles?: string[]
 }
 
-export default function ProtectedRoute({ children, roles }: Props) {
-
+export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
   const user = useAuthStore((state) => state.user)
 
   if (!user) {
     return <Navigate to="/login" replace />
   }
 
-  // chặn role không hợp lệ
+  // Block invalid roles
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/login" replace />
   }
 
-  return children
+  return <>{children}</>
 }

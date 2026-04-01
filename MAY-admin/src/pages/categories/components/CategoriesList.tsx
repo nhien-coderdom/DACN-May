@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 // call hooks
 import { useCategories, useDeleteCategory, useCreateCategory, useUpdateCategory } from '../hook' 
 import { CategoryForm } from './CategoryForm'
