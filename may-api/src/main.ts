@@ -1,18 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common/pipes/index.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
   app.enableCors({
     origin: ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
   });
 
-  //  bật validate DTO
-  app.useGlobalPipes(new ValidationPipe());
+  // Bật validate DTO
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,       // loại bỏ field không có trong DTO
+      transform: true,       // tự convert kiểu (string -> number)
+      forbidNonWhitelisted: true, // nếu gửi field lạ → báo lỗi
+    }),
+  );
 
   await app.listen(process.env.PORT ?? 3000);
 }

@@ -25,9 +25,11 @@ export default function Login() {
         password,
       })
 
-      const { user, token } = res.data
+      const { user, access_token } = res.data
 
-      login(user, token)
+login(user, access_token)
+
+console.log("RES:", res.data)
 
       if (user.role === "ADMIN") {
         navigate("/")
