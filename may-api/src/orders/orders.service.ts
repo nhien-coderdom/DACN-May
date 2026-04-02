@@ -5,10 +5,15 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateOrderDto } from './dto/create-orders.dto.js';
+import { OrdersGateway } from './orders.gateway.js';
 import { OrderStatus } from '@prisma/client';
+
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ordersGateway: OrdersGateway
+  ) { }
 
   async findAll() {
     return this.prisma.order.findMany({
@@ -20,6 +25,7 @@ export class OrdersService {
         items: {
           include: {
             toppings: true,
+            product: true,
           },
         },
         payments: true,
@@ -40,6 +46,7 @@ export class OrdersService {
         items: {
           include: {
             toppings: true,
+            product: true,
           },
         },
         payments: true,
@@ -86,162 +93,164 @@ export class OrdersService {
     const { userId, phone, address, items, usedPoint: inputUsedPoint } = data;
     const usedPoint = inputUsedPoint || 0;
 
-  if (!items || items.length === 0) {
-    throw new BadRequestException('Order must contain at least one item');
-  }
-
-  return this.prisma.$transaction(async (prisma) => {
-    //  1. Check user
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) throw new BadRequestException('User not found');
-
-    if (usedPoint < 0) {
-      throw new BadRequestException('usedPoint cannot be negative');
+    if (!items || items.length === 0) {
+      throw new BadRequestException('Order must contain at least one item');
     }
 
-    if (usedPoint > user.loyaltyPoint) {
-      throw new BadRequestException('Not enough loyalty points');
-    }
-
-    // 2. Lấy tất cả product + topping 1 lần
-    // Validate: check for duplicate productIds to avoid logic errors
-    const productIds = items.map((i) => i.productId);
-    const uniqueProductIds = [...new Set(productIds)];
-    if (uniqueProductIds.length < productIds.length) {
-      // Warning: duplicate products detected but allowed (will still be created)
-    }
-
-    const products = await prisma.product.findMany({
-      where: { id: { in: uniqueProductIds } },
-    });
-
-    // Batch query toppings (UNIQUE to avoid redundant queries)
-    const toppingIds = [...new Set(items.flatMap((i) => i.toppings || []))];
-
-    const toppings = await prisma.topping.findMany({
-      where: { id: { in: toppingIds } },
-    });
-
-    // dùng Map 
-    const productMap = new Map(products.map((p) => [p.id, p]));
-    const toppingMap = new Map(toppings.map((t) => [t.id, t]));
-
-    // 🔹 3. Tạo order trước
-    const order = await prisma.order.create({
-      data: {
-        userId,
-        phone,
-        address,
-        status: 'PENDING',
-        total: 0,
-        usedPoint,
-      },
-    });
-
-    let total = 0;
-
-    //  Xử lý items
-    for (const item of items) {
-      if (item.quantity <= 0) {
-        throw new BadRequestException('Quantity must be greater than 0');
-      }
-
-      const product = productMap.get(item.productId);
-      if (!product) {
-        throw new BadRequestException(
-          `Product ${item.productId} not found`,
-        );
-      }
-
-      const orderItem = await prisma.orderItem.create({
-        data: {
-          orderId: order.id,
-          productId: product.id,
-          quantity: item.quantity,
-          productName: product.name,
-          basePrice: product.price,
-        },
-      });
-
-      let itemTotal = product.price * item.quantity;
-
-      // toppings
-      if (item.toppings && item.toppings.length > 0) {
-        for (const toppingId of item.toppings) {
-          const topping = toppingMap.get(toppingId);
-          if (!topping) {
-            throw new BadRequestException(
-              `Topping ${toppingId} not found`,
-            );
-          }
-
-          await prisma.orderItemTopping.create({
-            data: {
-              orderItemId: orderItem.id,
-              toppingName: topping.name,
-              toppingPrice: topping.price,
-            },
-          });
-
-          itemTotal += topping.price * item.quantity;
-        }
-      }
-
-      total += itemTotal;
-    }
-
-    // Apply usedPoint
-    if (usedPoint > total) {
-      throw new BadRequestException('usedPoint exceeds order total');
-    }
-
-    total = total - usedPoint;
-
-    // 🔹 6. Tính earnedPoint (ví dụ 10%)
-    const earnedPoint = Math.floor(total * 0.1);
-
-    // 🔹 7. Update order
-    const updatedOrder = await prisma.order.update({
-      where: { id: order.id },
-      data: {
-        total,
-        earnedPoint,
-      },
-      include: {
-        user: true,
-        items: {
-          include: {
-            toppings: true,
-          },
-        },
-        payments: true,
-        logs: true,
-      },
-    });
-
-    //   Log
-    await prisma.orderLog.create({
-      data: {
-        orderId: updatedOrder.id,
-        status: 'PENDING',
-        note: 'Order created',
-      },
-    });
-
-    // Deduct loyalty points if usedPoint > 0
-    if (usedPoint > 0) {
-      await prisma.user.update({
+    return this.prisma.$transaction(async (prisma) => {
+      //  1. Check user
+      const user = await prisma.user.findUnique({
         where: { id: userId },
+      });
+      if (!user) throw new BadRequestException('User not found');
+
+      if (usedPoint < 0) {
+        throw new BadRequestException('usedPoint cannot be negative');
+      }
+
+      if (usedPoint > user.loyaltyPoint) {
+        throw new BadRequestException('Not enough loyalty points');
+      }
+
+      // 2. Lấy tất cả product + topping 1 lần
+      // Validate: check for duplicate productIds to avoid logic errors
+      const productIds = items.map((i) => i.productId);
+      const uniqueProductIds = [...new Set(productIds)];
+      if (uniqueProductIds.length < productIds.length) {
+        // Warning: duplicate products detected but allowed (will still be created)
+      }
+
+      const products = await prisma.product.findMany({
+        where: { id: { in: uniqueProductIds } },
+      });
+
+      // Batch query toppings (UNIQUE to avoid redundant queries)
+      const toppingIds = [...new Set(items.flatMap((i) => i.toppings || []))];
+
+      const toppings = await prisma.topping.findMany({
+        where: { id: { in: toppingIds } },
+      });
+
+      // dùng Map 
+      const productMap = new Map(products.map((p) => [p.id, p]));
+      const toppingMap = new Map(toppings.map((t) => [t.id, t]));
+
+      // 🔹 3. Tạo order trước
+      const order = await prisma.order.create({
         data: {
-          loyaltyPoint: { decrement: usedPoint },
+          userId,
+          phone,
+          address,
+          status: 'PENDING',
+          total: 0,
+          usedPoint,
         },
       });
-    }
 
-    return updatedOrder;
-  });
+      let total = 0;
+
+      //  Xử lý items
+      for (const item of items) {
+        if (item.quantity <= 0) {
+          throw new BadRequestException('Quantity must be greater than 0');
+        }
+
+        const product = productMap.get(item.productId);
+        if (!product) {
+          throw new BadRequestException(
+            `Product ${item.productId} not found`,
+          );
+        }
+
+        const orderItem = await prisma.orderItem.create({
+          data: {
+            orderId: order.id,
+            productId: product.id,
+            quantity: item.quantity,
+            productName: product.name,
+            basePrice: product.price,
+          },
+        });
+
+        let itemTotal = product.price * item.quantity;
+
+        // toppings
+        if (item.toppings && item.toppings.length > 0) {
+          for (const toppingId of item.toppings) {
+            const topping = toppingMap.get(toppingId);
+            if (!topping) {
+              throw new BadRequestException(
+                `Topping ${toppingId} not found`,
+              );
+            }
+
+            await prisma.orderItemTopping.create({
+              data: {
+                orderItemId: orderItem.id,
+                toppingName: topping.name,
+                toppingPrice: topping.price,
+              },
+            });
+
+            itemTotal += topping.price * item.quantity;
+          }
+        }
+
+        total += itemTotal;
+      }
+
+      // Apply usedPoint
+      if (usedPoint > total) {
+        throw new BadRequestException('usedPoint exceeds order total');
+      }
+
+      total = total - usedPoint;
+
+      // 🔹 6. Tính earnedPoint (ví dụ 10%)
+      const earnedPoint = Math.floor(total * 0.1);
+
+      // 🔹 7. Update order
+      const updatedOrder = await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          total,
+          earnedPoint,
+        },
+        include: {
+          user: true,
+          items: {
+            include: {
+              toppings: true,
+              product: true,
+            },
+          },
+          payments: true,
+          logs: true,
+        },
+      });
+
+      //   Log
+      await prisma.orderLog.create({
+        data: {
+          orderId: updatedOrder.id,
+          status: 'PENDING',
+          note: 'Order created',
+        },
+      });
+
+      // Deduct loyalty points if usedPoint > 0
+      if (usedPoint > 0) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            loyaltyPoint: { decrement: usedPoint },
+          },
+        });
+      }
+
+      this.ordersGateway.emitNewOrder(updatedOrder);
+      return updatedOrder;
+    });
   }
   async updateStatus(id: number, status: OrderStatus, userId?: number) {
     const order = await this.findOne(id);
@@ -269,7 +278,18 @@ export class OrdersService {
       const updated = await prisma.order.update({
         where: { id },
         data: { status },
-      });
+        include: {
+          user: true,
+          items: {
+            include: {
+              toppings: true,
+              product: true,
+            },
+          },
+          payments: true,
+          logs: true,
+        },
+      })
 
       await prisma.orderLog.create({
         data: {
@@ -289,7 +309,7 @@ export class OrdersService {
           },
         });
       }
-
+      this.ordersGateway.emitOrderUpdated(updated)
       return updated;
     });
   }
@@ -330,7 +350,7 @@ export class OrdersService {
 
       // recalculate total
       newTotal = order.total + order.usedPoint - data.usedPoint;
-      
+
       // CRITICAL: Check total not negative
       if (newTotal < 0) {
         throw new BadRequestException('usedPoint exceeds order total');
@@ -340,34 +360,35 @@ export class OrdersService {
       updateData.total = newTotal;
     }
 
-  return this.prisma.$transaction(async (prisma) => {
-    // Guard: only calculate pointDifference if usedPoint was actually provided
-    const pointDifference = data.usedPoint !== undefined ? data.usedPoint - order.usedPoint : 0;
-    
-    // Update user loyalty points if usedPoint changed
-    if (pointDifference !== 0) {
-      await prisma.user.update({
-        where: { id: order.userId },
-        data: {
-          loyaltyPoint: { decrement: pointDifference },
+    return this.prisma.$transaction(async (prisma) => {
+      // Guard: only calculate pointDifference if usedPoint was actually provided
+      const pointDifference = data.usedPoint !== undefined ? data.usedPoint - order.usedPoint : 0;
+
+      // Update user loyalty points if usedPoint changed
+      if (pointDifference !== 0) {
+        await prisma.user.update({
+          where: { id: order.userId },
+          data: {
+            loyaltyPoint: { decrement: pointDifference },
+          },
+        });
+      }
+
+      return await prisma.order.update({
+        where: { id },
+        data: updateData,
+        include: {
+          user: true,
+          items: {
+            include: {
+              toppings: true,
+              product: true,
+            },
+          },
+          payments: true,
+          logs: true,
         },
       });
-    }
-
-    return await prisma.order.update({
-      where: { id },
-      data: updateData,
-      include: {
-        user: true,
-        items: {
-          include: {
-            toppings: true,
-          },
-        },
-        payments: true,
-        logs: true,
-      },
-    });
-  })
+    })
   }
 }

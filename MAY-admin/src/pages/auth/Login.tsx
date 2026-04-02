@@ -35,7 +35,7 @@ console.log("RES:", res.data)
         navigate("/")
       }
       else if (user.role === "STAFF") {
-        navigate("/")
+        navigate("/StaffDashboard")
       }
       else {
         alert("You don't have permission to access admin panel")
