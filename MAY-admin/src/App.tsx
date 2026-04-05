@@ -1,12 +1,35 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import AppRoutes from "./routes/AppRoutes"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import Login from "@/pages/auth/Login"
+import StaffDashboard from "@/pages/dashboard/StaffDashboard"
+// import AdminDashboard from "@/pages/AdminDashboard"
+import { ProtectedRoute } from "@/pages/auth/components/ProtectedRoute"
 
-const queryClient = new QueryClient()
-
-export default function App() {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppRoutes />
-    </QueryClientProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* ADMIN only */}
+        {/* <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+          <Route path="/" element={<AdminDashboard />} />
+        </Route> */}
+
+        {/* STAFF only */}
+        <Route
+          path="/StaffDashboard"
+          element={
+            <ProtectedRoute roles={["STAFF"]}>
+              <StaffDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/unauthorized" element={<div>Không có quyền truy cập</div>} />
+      </Routes>
+    </BrowserRouter>
   )
 }
+
+export default App

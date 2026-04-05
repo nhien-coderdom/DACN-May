@@ -37,8 +37,10 @@ model Product {
   imageId     String?
   imageUrl    String?
   isDeleted   Boolean          @default(false)
+
   category    Category         @relation(fields: [categoryId], references: [id])
   toppings    ProductTopping[]
+  orderItems  OrderItem[]
 }
 
 model Category {
@@ -99,6 +101,7 @@ model OrderItem {
   productName String
   basePrice   Float
   order       Order              @relation(fields: [orderId], references: [id])
+  product     Product            @relation(fields: [productId], references: [id])
   toppings    OrderItemTopping[]
 }
 
