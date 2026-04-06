@@ -21,19 +21,22 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: (user, token) => {
     localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
     set({ user, token })
   },
 
   logout: () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     set({ user: null, token: null })
   },
 
   initializeAuth: () => {
     const token = localStorage.getItem('token')
-    if (token) {
-      // In real app, verify token with backend
-      set({ token })
+    const userStr = localStorage.getItem('user')
+    if (token && userStr) {
+      const user = JSON.parse(userStr)
+      set({ token, user })
     }
   },
 }))

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreateUserDto } from './dto/createUser.dto.js';
 import { UseGuards } from '@nestjs/common';
@@ -18,8 +18,9 @@ export class UsersController {
     @Get()
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(UserRole.ADMIN)
-    findAll() {
-        return this.usersService.findAll();
+    findAll(@Query('deleted') deleted?: string) {
+        const showDeleted = deleted === 'true';
+        return this.usersService.findAll(showDeleted);
     }
 
 
@@ -64,8 +65,16 @@ export class UsersController {
     @Delete(':id') // Chỉ admin mới có quyền xóa người dùng, và chỉ xóa mềm (soft delete)
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(UserRole.ADMIN)
-    deleteProfile(@Param('id') id: string) {
-        return this.usersService.deleteProfile(Number(id));
+    deleteProfile(
+        @Req() req,
+        @Param('id') id: string
+    ) {
+        const targetUserId = Number(id);
+        // Rule: Cannot delete yourself
+        if (req.user.id === targetUserId) {
+            throw new ForbiddenException('Cannot delete your own account');
+        }
+        return this.usersService.deleteProfile(targetUserId);
     }
 
 
@@ -116,14 +125,37 @@ export class UsersController {
     }
 
 
+    @Patch(':id') // Admin update info của user khác
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(UserRole.ADMIN)
+    updateUserById(
+        @Req() req,
+        @Param('id') id: string,
+        @Body() dto: UpdateUserDto
+    ) {
+        const targetUserId = Number(id);
+        // Rule: Cannot modify yourself
+        if (req.user.id === targetUserId) {
+            throw new ForbiddenException('Cannot modify your own information as admin');
+        }
+        return this.usersService.updateProfile(targetUserId, dto);
+    }
+
+
     @Patch(':id/role')
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(UserRole.ADMIN)
     updateUserRole(
+        @Req() req,
         @Param('id') id: string,
         @Body() dto: UpdateUserRoleDto
     ) {
-        return this.usersService.updateUserRole(Number(id), dto.role);
+        const targetUserId = Number(id);
+        // Rule: Cannot modify yourself
+        if (req.user.id === targetUserId) {
+            throw new ForbiddenException('Cannot change your own role');
+        }
+        return this.usersService.updateUserRole(targetUserId, dto.role);
     }
 
 

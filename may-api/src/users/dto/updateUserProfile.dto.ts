@@ -9,8 +9,9 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^[0-9]{9,11}$/, {
-    message: 'Số điện thoại không hợp lệ',
+  @Transform(({ value }) => value?.trim())
+  @Matches(/^0?\d{9,10}$/, {
+    message: 'Phone must be 9-10 digits (with or without leading 0, e.g., 0912345678 or 912345678)',
   })
   phone?: string;
 

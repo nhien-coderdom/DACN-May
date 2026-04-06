@@ -29,7 +29,7 @@ export default function Login() {
       login(user, access_token)
 
       if (user.role === "ADMIN") {
-        navigate("/")
+        navigate("/admin/products")
       }
       else if (user.role === "STAFF") {
         navigate("/StaffDashboard")

@@ -26,4 +26,8 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString({ message: 'imageUrl phải là text' })
   imageUrl?: string;
+
+  @IsOptional()
+  @IsString({ message: 'imageId phải là text' })
+  imageId?: string;
 }

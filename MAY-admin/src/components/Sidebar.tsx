@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Tag, Coffee, ShoppingCart, Users, Package } from 'lucide-react'
+import { LayoutDashboard, Tag, Coffee, ShoppingCart, Users, Package, TrendingUp } from 'lucide-react'
 
 interface NavItem {
   label: string
@@ -11,40 +11,47 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     label: 'Dashboard',
-    path: '/',
+    path: '/admin',
     icon: <LayoutDashboard size={20} />,
     status: 'active',
   },
   {
     label: 'Categories',
-    path: '/categories',
+    path: '/admin/categories',
     icon: <Tag size={20} />,
     status: 'active',
   },
   {
     label: 'Toppings',
-    path: '/toppings',
+    path: '/admin/toppings',
     icon: <Coffee size={20} />,
-    status: 'soon',
+    status: 'active',
   },
   {
     label: 'Products',
-    path: '/products',
+    path: '/admin/products',
     icon: <Package size={20} />,
     status: 'active',
   },
   {
     label: 'Orders',
-    path: '/orders',
+    path: '/admin/orders',
     icon: <ShoppingCart size={20} />,
     status: 'active',
   },
   {
+    label: 'Revenue',
+    path: '/admin/revenues',
+    icon: <TrendingUp size={20} />,
+    status: 'active',
+  },
+  {
     label: 'Users',
-    path: '/users',
+    path: '/admin/users',
     icon: <Users size={20} />,
     status: 'active',
   },
+
 ]
 
 export default function Sidebar() {
@@ -54,7 +61,7 @@ export default function Sidebar() {
     <aside className="w-64 border-r border-gray-200 bg-white h-screen sticky top-0">
       {/* Logo */}
       <div className="p-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-primary">MAY ☕</h1>
+        <h1 className="text-2xl font-bold text-primary">MAY </h1>
       </div>
 
       {/* Navigation */}

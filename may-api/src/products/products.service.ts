@@ -26,6 +26,7 @@ export class ProductsService {
         description: data.description,
         categoryId: data.categoryId,
         imageUrl: data.imageUrl,
+        imageId: data.imageId,
       },
       include: {
         category: true,
@@ -104,6 +105,7 @@ export class ProductsService {
         description: data.description,
         categoryId: data.categoryId,
         imageUrl: data.imageUrl,
+        imageId: data.imageId,
       },
       include: {
         category: true,

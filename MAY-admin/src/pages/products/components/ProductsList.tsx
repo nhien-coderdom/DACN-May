@@ -1,0 +1,174 @@
+import { useState, useMemo } from 'react'
+import { useProducts, useDeleteProduct, useCreateProduct, useUpdateProduct } from '../hook'
+import { ProductForm } from './ProductForm'
+import type { Product, CreateProductDTO, UpdateProductDTO } from '../types'
+
+export const ProductsList = () => {
+  // 1️⃣ FETCH DỮ LIỆU PRODUCTS
+  const { data, isLoading } = useProducts()
+  const { mutate: deleteProduct } = useDeleteProduct()
+  const { mutate: createProduct } = useCreateProduct()
+
+  // 2️⃣ STATE QUẢN LÝ MODAL & FORM
+  const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState<Product | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // 3️⃣ SETUP UPDATE MUTATION
+  const updateMutation = useUpdateProduct(editing?.id ?? 0)
+  const { mutate: updateProduct } = updateMutation
+
+  // 4️⃣ MEMOIZED FILTERED DATA - Search by name or description
+  const filteredData = useMemo(() => {
+    if (!data) return []
+    
+    const searchLower = searchTerm.toLowerCase()
+    
+    return data.filter(product => {
+      // Search in name or description
+      return (
+        product.name.toLowerCase().includes(searchLower) ||
+        (product.description && product.description.toLowerCase().includes(searchLower))
+      )
+    })
+  }, [data, searchTerm])
+
+  // 4️⃣ XỬ LÝ LOADING STATE
+  if (isLoading) return <p>Loading...</p>
+
+  // 5️⃣ HÀM DELETE
+  const handleDelete = (id: number) => {
+    if (confirm('Delete this product?')) {
+      deleteProduct(id)
+    }
+  }
+
+  // 6️⃣ HÀM EDIT
+  const handleEdit = (product: Product) => {
+    setEditing(product)
+    setOpen(true)
+  }
+
+  // 7️⃣ HÀM CREATE
+  const handleCreate = () => {
+    setEditing(null)
+    setOpen(true)
+  }
+
+  // 8️⃣ HÀM SUBMIT
+  const handleSubmit = (data: CreateProductDTO | UpdateProductDTO) => {
+    if (editing) {
+      updateProduct(data as UpdateProductDTO)
+    } else {
+      createProduct(data as CreateProductDTO)
+    }
+    setOpen(false)
+  }
+
+  return (
+    <div className="p-6">
+      {/* =================== HEADER =================== */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Products</h1>
+        <button
+          onClick={handleCreate}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          + Add Product
+        </button>
+      </div>
+
+      {/* =================== SEARCH BAR =================== */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by name or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {searchTerm && (
+          <p className="text-sm text-gray-600 mt-2">
+            Found {filteredData.length} result{filteredData.length !== 1 ? 's' : ''} for "{searchTerm}"
+          </p>
+        )}
+      </div>
+
+      {/* =================== BẢNG PRODUCTS =================== */}
+      <div className="overflow-x-auto border rounded-lg">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-100 border-b">
+              <th className="px-6 py-3 text-left text-sm font-semibold">#</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Price</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Category</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Description</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Image</th>
+              <th className="px-6 py-3 text-center text-sm font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                  {searchTerm ? `No products found matching "${searchTerm}"` : 'No products yet'}
+                </td>
+              </tr>
+            ) : (
+              filteredData.map((product, index) => (
+                <tr key={product.id} className="border-b hover:bg-gray-50 transition">
+                  <td className="px-6 py-4 text-sm text-gray-700">{index + 1}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{product.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">${product.price}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">ID: {product.categoryId}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-xs">
+                    {product.description || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="h-10 w-10 object-cover rounded"
+                      />
+                    ) : (
+                      <span className="text-gray-400">No image</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-sm flex gap-2 justify-center">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* =================== MODAL =================== */}
+      {open && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <div className="bg-white p-6 rounded w-96 max-h-screen overflow-y-auto">
+            <ProductForm
+              initialData={editing}
+              onSubmit={handleSubmit}
+              onClose={() => setOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

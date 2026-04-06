@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 // call hooks
 import { useCategories, useDeleteCategory, useCreateCategory, useUpdateCategory } from '../hook' 
 import { CategoryForm } from './CategoryForm'
@@ -11,8 +11,24 @@ export const CategoriesList = () => {
 
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const updateMutation = useUpdateCategory(editing?.id ?? 0)
   const { mutate: updateCategory } = updateMutation
+
+  // Memoized filtered data
+  const filteredData = useMemo(() => {
+    if (!data) return []
+    
+    const searchLower = searchTerm.toLowerCase()
+    
+    return data.filter(cat => {
+      // Search in name or slug
+      return (
+        cat.name.toLowerCase().includes(searchLower) ||
+        cat.slug.toLowerCase().includes(searchLower)
+      )
+    })
+  }, [data, searchTerm])
 
   if (isLoading) return <p>Loading...</p>
 
@@ -44,7 +60,7 @@ export const CategoriesList = () => {
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex justify-between mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Categories</h1>
         <button
           onClick={handleCreate}
@@ -52,6 +68,22 @@ export const CategoriesList = () => {
         >
           + Add Category
         </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by name or slug..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {searchTerm && (
+          <p className="text-sm text-gray-600 mt-2">
+            Found {filteredData.length} result{filteredData.length !== 1 ? 's' : ''} for "{searchTerm}"
+          </p>
+        )}
       </div>
 
       {/* Table */}
@@ -66,27 +98,35 @@ export const CategoriesList = () => {
             </tr>
           </thead>
           <tbody>
-            {data?.map((cat, index) => (
-              <tr key={cat.id} className="border-b hover:bg-gray-50 transition">
-                <td className="px-6 py-4 text-sm text-gray-700">{index + 1}</td>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">{cat.name}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{cat.slug}</td>
-                <td className="px-6 py-4 text-sm flex gap-2 justify-center">
-                  <button
-                    onClick={() => handleEdit(cat)}
-                    className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cat.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+            {filteredData.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  {searchTerm ? `No categories found matching "${searchTerm}"` : 'No categories yet'}
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredData.map((cat, index) => (
+                <tr key={cat.id} className="border-b hover:bg-gray-50 transition">
+                  <td className="px-6 py-4 text-sm text-gray-700">{index + 1}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{cat.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{cat.slug}</td>
+                  <td className="px-6 py-4 text-sm flex gap-2 justify-center">
+                    <button
+                      onClick={() => handleEdit(cat)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(cat.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
