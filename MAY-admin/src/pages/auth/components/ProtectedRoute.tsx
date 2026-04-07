@@ -17,11 +17,11 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
 
   if (roles && !roles.includes(user.role as Role)) {
     if (user.role === "ADMIN") {
-      return <Navigate to="/admin-dashboard" replace />
+      return <Navigate to="/admin" replace />
     }
 
     if (user.role === "STAFF") {
-      return <Navigate to="/staff-dashboard" replace />
+      return <Navigate to="/staffDashboard" replace />
     }
 
     return <Navigate to="/unauthorized" replace />
