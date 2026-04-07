@@ -73,7 +73,7 @@ function Header() {
             >
               <FiUser size={16} />
               <span className="hidden sm:inline">
-                {user.name?.split(" ")[0] || "Profile"}
+                {user.name?.split(" ").pop() || "Profile"}
               </span>
             </NavLink>
 
