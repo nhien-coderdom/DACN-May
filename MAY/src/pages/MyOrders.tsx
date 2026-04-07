@@ -18,9 +18,10 @@ function MyOrders() {
 
   useEffect(() => {
     fetchOrders();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  const userOrders = user ? orders.filter((order) => order.userId === user.id) : [];
+  const userOrders = user ? orders.filter((order) => order.userId === user.id || order.email === user.email) : [];
 
   const formatPrice = (value: number) =>
     new Intl.NumberFormat("vi-VN").format(value) + "đ";
@@ -84,12 +85,12 @@ function MyOrders() {
   };
 
   const getOrderItemTotal = (item: OrderItem) => {
-    const toppingTotal = item.toppings.reduce(
+    const toppingTotal = (item.toppings ?? []).reduce(
       (sum, topping) => sum + topping.toppingPrice,
       0
     );
 
-    return (item.basePrice + toppingTotal) * item.quantity;
+    return ((item.basePrice ?? item.price ?? 0) + toppingTotal) * item.quantity;
   };
 
   if (!user) {
@@ -188,7 +189,7 @@ function MyOrders() {
                     Tổng tiền
                   </p>
                   <p className="mt-1 text-lg font-bold text-orange-500">
-                    {formatPrice(order.total)}
+                    {formatPrice(order.total ?? order.finalAmount ?? order.totalAmount ?? 0)}
                   </p>
                 </div>
               </div>
@@ -199,14 +200,14 @@ function MyOrders() {
                   {order.items.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <div>
-                        <span className="font-semibold">{item.productName}</span>
+                        <span className="font-semibold">{item.productName ?? item.title ?? ""}</span>
 
-                        {item.toppings.length > 0 && (
+                        {(item.toppings?.length ?? 0) > 0 && (
                           <span className="text-neutral-600">
                             {" "}
                             +{" "}
                             {item.toppings
-                              .map((tp) => tp.toppingName)
+                              ?.map((tp) => tp.toppingName)
                               .join(", ")}
                           </span>
                         )}
@@ -231,7 +232,7 @@ function MyOrders() {
                   <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-600">
                     Giao đến
                   </p>
-                  <p className="font-medium">{order.user?.name || "Khách hàng"}</p>
+                  <p className="font-medium">{order.user?.name || order.customerName || "Khách hàng"}</p>
                   <p className="text-neutral-600">{order.phone}</p>
                   <p className="text-xs text-neutral-600">{order.address}</p>
                 </div>
@@ -240,9 +241,9 @@ function MyOrders() {
                   <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-600">
                     Điểm thưởng
                   </p>
-                  <p className="font-medium">Đã dùng: {order.usedPoint} điểm</p>
+                  <p className="font-medium">Đã dùng: {order.usedPoint ?? 0} điểm</p>
                   <p className="text-neutral-600">
-                    Nhận được: {order.earnedPoint} điểm
+                    Nhận được: {order.earnedPoint ?? 0} điểm
                   </p>
                 </div>
               </div>

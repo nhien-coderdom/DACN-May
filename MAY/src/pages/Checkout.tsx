@@ -14,7 +14,7 @@ function Checkout() {
   const [step, setStep] = useState(1);
   const [usePointsAmount, setUsePointsAmount] = useState(0);
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || "",
+    fullName: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
     address: "",
@@ -51,11 +51,21 @@ function Checkout() {
         addPoints(pointsEarned);
 
         createOrder({
-          items: cart,
+          items: cart.map((item) => ({
+            id: item.id,
+            productId: item.id,
+            productName: item.title,
+            basePrice: item.price,
+            quantity: item.quantity,
+            toppings: (item.toppings ?? []).map((name) => ({
+              toppingName: name,
+              toppingPrice: 0,
+            })),
+          })),
           totalAmount: subtotal,
           discountPoints: usePointsAmount,
           finalAmount,
-          status: "pending",
+          status: "PENDING",
           customerName: formData.fullName,
           email: formData.email,
           phone: formData.phone,
@@ -78,7 +88,7 @@ function Checkout() {
   const discountFromPoints = (usePointsAmount / 1000) * 10000;
   const finalAmount = subtotal + shipping + tax - discountFromPoints;
 
-  const maxPointsCanUse = Math.min(user?.loyaltyPoints || 0, Math.floor(subtotal / 10000) * 1000);
+  const maxPointsCanUse = Math.min((user?.loyaltyPoints ?? user?.loyaltyPoint ?? 0), Math.floor(subtotal / 10000) * 1000);
 
   if (cart.length === 0) {
     return (
@@ -298,7 +308,7 @@ function Checkout() {
                 </div>
 
                 {/* Loyalty Points */}
-                {user && user.loyaltyPoints > 0 && (
+                {user && (user.loyaltyPoints ?? user.loyaltyPoint ?? 0) > 0 && (
                   <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6 sm:p-8">
                     <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
                       <FiAward className="text-orange-500" size={20} />
@@ -311,7 +321,7 @@ function Checkout() {
                           Điểm sẽ dùng
                         </label>
                         <span className="text-sm text-neutral-600">
-                          Có sẵn: {user.loyaltyPoints.toLocaleString()} pts
+                          Có sẵn: {(user.loyaltyPoints ?? user.loyaltyPoint ?? 0).toLocaleString()} pts
                         </span>
                       </div>
                       <input

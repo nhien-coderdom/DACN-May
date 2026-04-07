@@ -1,104 +1,121 @@
 import React, { createContext, useContext, useState } from "react";
+import axios from "axios";
 
-export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ??
+  import.meta.env.VITE_API_URL ??
+  "http://localhost:3000";
+
+export type OrderStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "PREPARING"
+  | "SHIPPING"
+  | "DELIVERED"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export type OrderItemTopping = {
+  id?: number;
+  orderItemId?: number;
+  toppingName: string;
+  toppingPrice: number;
+};
 
 export type OrderItem = {
   id: number;
-  productId: number;
-  title: string;
-  image: string;
-  price: number;
   quantity: number;
+  // Backend schema fields
+  orderId?: number;
+  productId?: number;
+  productName?: string;
+  basePrice?: number;
+  toppings?: OrderItemTopping[];
+  // Legacy fields (CartItem compatibility)
+  title?: string;
+  image?: string;
+  price?: number;
   size?: string;
-  toppings?: string[];
 };
 
 export type Order = {
-  id: string;
-  orderId: string;
-  items: OrderItem[];
-  totalAmount: number;
-  discountPoints: number;
-  finalAmount: number;
+  id: number;
   status: OrderStatus;
-  customerName: string;
-  email: string;
-  phone: string;
-  address: string;
-  paymentMethod: string;
   createdAt: string;
   updatedAt: string;
-  estimatedDelivery?: string;
+  items: OrderItem[];
+  // Backend schema fields
+  userId?: number;
+  phone?: string;
+  address?: string;
+  total?: number;
+  usedPoint?: number;
+  earnedPoint?: number;
+  user?: { id?: number; name?: string; email?: string };
+  // Legacy fields (Checkout compatibility)
+  orderId?: string;
+  totalAmount?: number;
+  discountPoints?: number;
+  finalAmount?: number;
+  customerName?: string;
+  email?: string;
+  paymentMethod?: string;
 };
 
 type OrdersContextType = {
   orders: Order[];
-  createOrder: (order: Omit<Order, "id" | "orderId" | "createdAt" | "updatedAt">) => void;
-  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
-  getOrderById: (orderId: string) => Order | undefined;
+  loading: boolean;
+  fetchOrders: () => Promise<void>;
+  createOrder: (order: Omit<Order, "id" | "createdAt" | "updatedAt">) => void;
+  updateOrderStatus: (orderId: number | string, status: OrderStatus) => void;
+  getOrderById: (orderId: number | string) => Order | undefined;
   getUserOrders: (email: string) => Order[];
 };
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
 export function OrdersProvider({ children }: { children: React.ReactNode }) {
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "1",
-      orderId: "ORD-001",
-      items: [
-        {
-          id: 1,
-          productId: 1,
-          title: "MATCHA LATTE",
-          image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=80",
-          price: 45000,
-          quantity: 1,
-          size: "M",
-          toppings: ["Boba"],
-        },
-      ],
-      totalAmount: 45000,
-      discountPoints: 0,
-      finalAmount: 45000,
-      status: "delivered",
-      customerName: "Nguyễn Văn A",
-      email: "user@example.com",
-      phone: "0912345678",
-      address: "123 Nguyễn Hữu Cảnh, Bình Thạnh, TP.HCM",
-      paymentMethod: "cod",
-      createdAt: "2024-04-01",
-      updatedAt: "2024-04-02",
-      estimatedDelivery: "2024-04-02",
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const createOrder = (order: Omit<Order, "id" | "orderId" | "createdAt" | "updatedAt">) => {
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("access_token");
+      const response = await axios.get<Order[]>(`${API_BASE_URL}/orders`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      setOrders(response.data);
+    } catch (error) {
+      console.error("fetchOrders failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createOrder = (order: Omit<Order, "id" | "createdAt" | "updatedAt">) => {
     const newOrder: Order = {
       ...order,
-      id: String(orders.length + 1),
-      orderId: `ORD-${String(orders.length + 1).padStart(3, "0")}`,
-      createdAt: new Date().toISOString().split("T")[0],
-      updatedAt: new Date().toISOString().split("T")[0],
-      estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
+      id: Date.now(),
+      orderId: order.orderId ?? `ORD-${String(orders.length + 1).padStart(3, "0")}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     setOrders((prev) => [newOrder, ...prev]);
   };
 
-  const updateOrderStatus = (orderId: string, status: OrderStatus) => {
+  const updateOrderStatus = (orderId: number | string, status: OrderStatus) => {
     setOrders((prev) =>
       prev.map((order) =>
-        order.orderId === orderId
-          ? { ...order, status, updatedAt: new Date().toISOString().split("T")[0] }
+        order.id === orderId || order.orderId === orderId
+          ? { ...order, status, updatedAt: new Date().toISOString() }
           : order
       )
     );
   };
 
-  const getOrderById = (orderId: string) => {
-    return orders.find((order) => order.orderId === orderId);
+  const getOrderById = (orderId: number | string) => {
+    return orders.find((order) => order.id === orderId || order.orderId === String(orderId));
   };
 
   const getUserOrders = (email: string) => {
@@ -107,7 +124,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <OrdersContext.Provider
-      value={{ orders, createOrder, updateOrderStatus, getOrderById, getUserOrders }}
+      value={{ orders, loading, fetchOrders, createOrder, updateOrderStatus, getOrderById, getUserOrders }}
     >
       {children}
     </OrdersContext.Provider>

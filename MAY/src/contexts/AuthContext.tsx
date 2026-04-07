@@ -9,6 +9,15 @@ export type User = {
   name: string;
   role: string;
   phone?: string | null;
+  // Backend fields
+  loyaltyPoint?: number;
+  totalSpent?: number;
+  totalOrders?: number;
+  createdAt?: string;
+  // Alias fields for page compatibility
+  fullName?: string;
+  loyaltyPoints?: number;
+  joinedAt?: string;
 };
 
 type AuthContextType = {
@@ -26,6 +35,8 @@ type AuthContextType = {
   fetchMe: () => Promise<void>;
   updateUserInfo: (updates: Partial<User>) => void;
   changePassword: (oldPassword: string, newPassword: string) => Promise<void>;
+  usePoints: (amount: number) => void;
+  addPoints: (amount: number) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,7 +76,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
 
-      setUser(res.data);
+      setUser({
+        ...res.data,
+        fullName: res.data.name,
+        loyaltyPoints: res.data.loyaltyPoint ?? 0,
+        joinedAt: res.data.createdAt,
+      });
     } catch (error) {
       console.error("fetchMe failed:", error);
 
@@ -88,7 +104,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         });
 
-        setUser(meRes.data);
+        setUser({
+          ...meRes.data,
+          fullName: meRes.data.name,
+          loyaltyPoints: meRes.data.loyaltyPoint ?? 0,
+          joinedAt: meRes.data.createdAt,
+        });
       } catch (refreshError) {
         console.error("refresh token failed:", refreshError);
         clearTokens();
@@ -152,6 +173,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) => (prev ? { ...prev, ...updates } : null));
   };
 
+  const usePoints = (amount: number) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const newPoints = Math.max(0, (prev.loyaltyPoint ?? 0) - amount);
+      return { ...prev, loyaltyPoint: newPoints, loyaltyPoints: newPoints };
+    });
+  };
+
+  const addPoints = (amount: number) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const newPoints = (prev.loyaltyPoint ?? 0) + amount;
+      return { ...prev, loyaltyPoint: newPoints, loyaltyPoints: newPoints };
+    });
+  };
+
   const changePassword = async (
     oldPassword: string,
     newPassword: string
@@ -191,6 +228,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fetchMe,
         updateUserInfo,
         changePassword,
+        usePoints,
+        addPoints,
       }}
     >
       {children}

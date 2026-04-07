@@ -8,7 +8,7 @@ function Profile() {
   const { user, logout, updateUserInfo } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || "",
+    fullName: user?.name || "",
     phone: user?.phone || "",
   });
 
@@ -30,6 +30,7 @@ function Profile() {
 
   const handleSave = () => {
     updateUserInfo({
+      name: formData.fullName,
       fullName: formData.fullName,
       phone: formData.phone,
     });
@@ -127,7 +128,7 @@ function Profile() {
                     Tên
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {user.fullName}
+                    {user.name}
                   </p>
                 </div>
 
@@ -154,7 +155,7 @@ function Profile() {
                     Thành viên từ
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {new Date(user.joinedAt).toLocaleDateString("vi-VN")}
+                    {new Date(user.createdAt ?? user.joinedAt ?? new Date().toISOString()).toLocaleDateString("vi-VN")}
                   </p>
                 </div>
               </div>
@@ -192,7 +193,7 @@ function Profile() {
               Điểm hiện tại
             </p>
             <p className="mt-2 text-5xl font-black text-orange-500">
-              {user.loyaltyPoints.toLocaleString()}
+              {(user.loyaltyPoints ?? user.loyaltyPoint ?? 0).toLocaleString()}
             </p>
             <p className="mt-1 text-sm text-neutral-600">
               pts
@@ -239,7 +240,7 @@ function Profile() {
                 Tổng chi tiêu
               </p>
               <p className="mt-1 text-2xl font-bold text-neutral-900">
-                {formatPrice(user.totalSpent)}
+                {formatPrice(user.totalSpent ?? 0)}
               </p>
             </div>
 
