@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface ChartProps {
   title: string;
   data: Array<{ label: string; value: number }>;

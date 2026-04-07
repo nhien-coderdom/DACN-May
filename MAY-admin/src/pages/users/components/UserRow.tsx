@@ -1,6 +1,5 @@
 import React from 'react'
 import type { User } from '../types'
-import { getRoleBadgeColor } from '../utils'
 
 interface UserRowProps {
   user: User

@@ -1,74 +1,53 @@
 import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Hero from "../components/Hero";
-
-const drinks = [
-  {
-    id: 1,
-    title: "MATCHA LATTE",
-    subtitle: "Creamy · Smooth",
-    description: "Matcha latte with smooth milk foam.",
-    tag: "Coffee",
-    price: 45000,
-    image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 2,
-    title: "PEACH LEMONGRASS TEA",
-    subtitle: "Sweet · Refreshing",
-    description: "Peach lemongrass tea with fresh peach slices and lemongrass.",
-    tag: "Tea",
-    price: 49000,
-    image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1000&q=80",
-  },
-  {
-    id: 3,
-    title: "BERRY SMOOTHIE",
-    subtitle: "Fruity · Creamy",
-    description: "Berry smoothie with fresh fruits.",
-    tag: "Smoothie",
-    price: 52000,
-    image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 4,
-    title: "MANGO LASSI",
-    subtitle: "Tropical · Creamy",
-    description: "Fresh mango lassi with yogurt and spices.",
-    tag: "Smoothie",
-    price: 50000,
-    image: "https://images.unsplash.com/photo-1590161990359-f02e5f80fb8f?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 5,
-    title: "LEMON JUICE",
-    subtitle: "Fresh · Zesty",
-    description: "Freshly squeezed lemon juice.",
-    tag: "Juice",
-    price: 39000,
-    image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=800&q=80",
-  },
-];
-
-const categories = ["All", "Coffee", "Tea", "Smoothie", "Juice"];
+import { useProducts } from "../hooks/useProducts";
 
 function ProductsPage() {
   const { category } = useParams();
   const navigate = useNavigate();
+  const { categories, filteredProducts, isLoading, errorMessage } =
+    useProducts(category);
 
-  const filteredDrinks = useMemo(() => {
-    if (!category) {
-      return drinks;
-    }
-    return drinks.filter(
-      (drink) => drink.tag.toLowerCase() === category.toLowerCase()
-    );
-  }, [category]);
+  const filteredDrinks = useMemo(() => filteredProducts, [filteredProducts]);
 
   const formatPrice = (value: number) =>
     new Intl.NumberFormat("vi-VN").format(value) + "đ";
 
   
+  if (isLoading) {
+    return (
+      <div>
+        <div className="py-1 sm:py-2">
+          <Hero />
+        </div>
+        <div className="mx-4 rounded-[28px] bg-white p-8 text-center shadow-lg sm:mx-0">
+          <p className="text-lg font-semibold text-neutral-700">Dang tai san pham...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div>
+        <div className="py-1 sm:py-2">
+          <Hero />
+        </div>
+        <div className="mx-4 rounded-[28px] bg-white p-8 text-center shadow-lg sm:mx-0">
+          <h2 className="text-2xl font-bold text-neutral-800">Khong the tai du lieu</h2>
+          <p className="mt-2 text-sm text-neutral-600">{errorMessage}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 rounded-full bg-orange-400 px-5 py-2 text-sm font-semibold text-white transition hover:bg-orange-500"
+          >
+            Thu lai
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
        <div className="py-1 sm:py-2">
@@ -78,22 +57,22 @@ function ProductsPage() {
       <div className="mb-8 flex flex-wrap justify-center gap-3 px-4 sm:gap-4">
         {categories.map((cat) => (
           <button
-            key={cat}
+            key={cat.slug || "all"}
             onClick={() => {
-              if (cat === "All") {
+              if (!cat.slug) {
                 navigate("/products");
               } else {
-                navigate(`/products/${cat.toLowerCase()}`);
+                navigate(`/products/${cat.slug.toLowerCase()}`);
               }
             }}
             className={`rounded-full px-6 py-2 font-semibold transition ${
-              (!category && cat === "All") ||
-              (category?.toLowerCase() === cat.toLowerCase())
+              (!category && !cat.slug) ||
+              (category?.toLowerCase() === cat.slug.toLowerCase())
                 ? "bg-orange-400 text-white shadow-md hover:bg-orange-500"
                 : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
             }`}
           >
-            {cat}
+            {cat.name}
           </button>
         ))}
       </div>

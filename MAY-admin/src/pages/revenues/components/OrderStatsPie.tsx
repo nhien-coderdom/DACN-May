@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card } from '@/components/ui/card'
 
 interface PieChartProps {
@@ -16,7 +15,7 @@ export const OrderStatsPie: React.FC<PieChartProps> = ({ data }) => {
   const radius = 100
 
   let currentAngle = -90 // Start from top
-  const slices = data.map((item, index) => {
+  const slices = data.map((item) => {
     const sliceAngle = (item.percentage / 100) * 360
     const startAngle = currentAngle
     const endAngle = currentAngle + sliceAngle

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FiPlus, FiMinus, FiShoppingCart, FiCheck } from "react-icons/fi";
 import { useCart } from "../contexts/CartContext";
+import { useProductDetail } from "../hooks/useProductDetail";
 
 const sizes = [
   { id: "s", name: "S (250ml)", price: 0 },
@@ -9,99 +10,44 @@ const sizes = [
   { id: "l", name: "L (450ml)", price: 10000 },
 ];
 
-const toppings = [
-  { id: "boba", name: "Boba", price: 10000 },
-  { id: "jelly", name: "Jelly", price: 8000 },
-  { id: "pudding", name: "Pudding", price: 8000 },
-  { id: "egg", name: "Egg", price: 12000 },
-];
-
-const drinks = [
-  {
-    id: 1,
-    title: "MATCHA LATTE",
-    subtitle: "Creamy · Smooth",
-    description:
-      "Matcha latte with smooth milk foam. A traditional Japanese green tea powder mixed with hot water to create a vibrant and creamy beverage.",
-    fullDescription:
-      "Experience the perfect balance of traditional Japanese matcha and creamy milk. Our matcha is sourced from the finest farms and whisked to perfection. The smooth milk foam creates a luxurious texture that complements the earthy, slightly sweet flavor of matcha.",
-    tag: "Coffee",
-    price: 45000,
-    image:
-      "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=80",
-    ingredients: ["Matcha Powder", "Steamed Milk", "Water", "Sugar"],
-    calories: 120,
-  },
-  {
-    id: 2,
-    title: "PEACH LEMONGRASS TEA",
-    subtitle: "Sweet · Refreshing",
-    description:
-      "Peach lemongrass tea with fresh peach slices and lemongrass.",
-    fullDescription:
-      "A refreshing fusion of sweet peach and aromatic lemongrass. This tea is perfect for a hot summer day, offering a perfect balance of fruity sweetness and herbal complexity. Each sip delivers a burst of fresh flavors.",
-    tag: "Tea",
-    price: 49000,
-    image:
-      "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1000&q=80",
-    ingredients: ["Lemongrass", "Peach", "Tea Leaves", "Honey"],
-    calories: 85,
-  },
-  {
-    id: 3,
-    title: "BERRY SMOOTHIE",
-    subtitle: "Fruity · Creamy",
-    description: "Berry smoothie with fresh fruits.",
-    fullDescription:
-      "A delicious blend of mixed berries with a creamy yogurt base. Rich in antioxidants and vitamins, this smoothie is both delicious and nutritious. Made with real fruit, no artificial additives.",
-    tag: "Smoothie",
-    price: 52000,
-    image:
-      "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=80",
-    ingredients: ["Mixed Berries", "Yogurt", "Milk", "Honey"],
-    calories: 180,
-  },
-  {
-    id: 4,
-    title: "MANGO LASSI",
-    subtitle: "Tropical · Creamy",
-    description: "Fresh mango lassi with yogurt and spices.",
-    fullDescription:
-      "A traditional Indian yogurt-based drink infused with fresh mango puree and a hint of cardamom. Creamy, refreshing, and naturally sweet, this is the perfect tropical escape.",
-    tag: "Smoothie",
-    price: 50000,
-    image:
-      "https://images.unsplash.com/photo-1590161990359-f02e5f80fb8f?auto=format&fit=crop&w=800&q=80",
-    ingredients: ["Mango", "Yogurt", "Cardamom", "Milk"],
-    calories: 165,
-  },
-  {
-    id: 5,
-    title: "LEMON JUICE",
-    subtitle: "Fresh · Zesty",
-    description: "Freshly squeezed lemon juice.",
-    fullDescription:
-      "Pure, freshly squeezed lemon juice served fresh. A natural energy booster packed with vitamin C and antioxidants. Perfect for a healthy start to your day.",
-    tag: "Juice",
-    price: 39000,
-    image:
-      "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=800&q=80",
-    ingredients: ["Fresh Lemons", "Water", "Sugar"],
-    calories: 60,
-  },
-];
-
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
+  const { product, relatedProducts, toppingOptions, isLoading, errorMessage } =
+    useProductDetail(id);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("m");
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
   const [showAddedMessage, setShowAddedMessage] = useState(false);
 
-  const product = drinks.find((d) => d.id === parseInt(id || ""));
+  if (isLoading) {
+    return (
+      <div className="mx-auto w-full max-w-7xl px-4 py-12 text-center">
+        <h1 className="mb-4 text-2xl font-bold text-neutral-900">
+          Dang tai chi tiet san pham...
+        </h1>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="mx-auto w-full max-w-7xl px-4 py-12 text-center">
+        <h1 className="mb-4 text-2xl font-bold text-neutral-900">
+          Khong the tai san pham
+        </h1>
+        <p className="mb-4 text-sm text-neutral-600">{errorMessage}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="rounded-full bg-orange-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+        >
+          Thu lai
+        </button>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -124,7 +70,9 @@ function ProductDetail() {
 
   const sizePrice = sizes.find((s) => s.id === selectedSize)?.price || 0;
   const toppingsPrice = selectedToppings.reduce(
-    (sum, toppingId) => sum + (toppings.find((t) => t.id === toppingId)?.price || 0),
+    (sum, toppingId) =>
+      sum +
+      (toppingOptions.find((t) => String(t.id) === toppingId)?.price || 0),
     0
   );
 
@@ -140,6 +88,10 @@ function ProductDetail() {
   };
 
   const handleAddToCart = () => {
+    const selectedToppingNames = toppingOptions
+      .filter((topping) => selectedToppings.includes(String(topping.id)))
+      .map((topping) => topping.name);
+
     addToCart({
       id: product.id,
       title: product.title,
@@ -147,15 +99,11 @@ function ProductDetail() {
       price: totalItemPrice,
       quantity,
       size: selectedSize,
-      toppings: selectedToppings,
+      toppings: selectedToppingNames,
     });
     setShowAddedMessage(true);
     setTimeout(() => setShowAddedMessage(false), 2000);
   };
-
-  const relatedProducts = drinks.filter(
-    (d) => d.tag === product.tag && d.id !== product.id
-  );
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -237,29 +185,36 @@ function ProductDetail() {
               <p className="mb-3 text-sm font-semibold text-neutral-900">
                 Toppings (Optional)
               </p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {toppings.map((topping) => {
-                  const active = selectedToppings.includes(topping.id);
+              {toppingOptions.length === 0 ? (
+                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-500">
+                  San pham nay hien chua co topping tuy chon.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {toppingOptions.map((topping) => {
+                    const toppingId = String(topping.id);
+                    const active = selectedToppings.includes(toppingId);
 
-                  return (
-                    <button
-                      key={topping.id}
-                      onClick={() => toggleTopping(topping.id)}
-                      className={`flex items-center justify-between rounded-2xl border-2 px-4 py-3 text-sm font-medium transition-all ${
-                        active
-                          ? "border-orange-400 bg-orange-50 text-orange-600"
-                          : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400"
-                      }`}
-                    >
-                      <span>{topping.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs">+{formatPrice(topping.price)}</span>
-                        {active && <FiCheck size={16} />}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                    return (
+                      <button
+                        key={topping.id}
+                        onClick={() => toggleTopping(toppingId)}
+                        className={`flex items-center justify-between rounded-2xl border-2 px-4 py-3 text-sm font-medium transition-all ${
+                          active
+                            ? "border-orange-400 bg-orange-50 text-orange-600"
+                            : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400"
+                        }`}
+                      >
+                        <span>{topping.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs">+{formatPrice(topping.price)}</span>
+                          {active && <FiCheck size={16} />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-[auto_1fr]">

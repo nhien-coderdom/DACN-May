@@ -1,0 +1,200 @@
+﻿[
+    {
+        "name":  "@hono/node-server",
+        "severity":  "high",
+        "isDirect":  false,
+        "fixAvailable":  "prisma",
+        "effects":  "@prisma/dev",
+        "via":  "@hono/node-server",
+        "range":  "\u003c1.19.10"
+    },
+    {
+        "name":  "@nestjs/platform-express",
+        "severity":  "high",
+        "isDirect":  true,
+        "fixAvailable":  true,
+        "effects":  "",
+        "via":  "multer",
+        "range":  "\u003c=11.1.15 || \u003e=12.0.0-alpha.0"
+    },
+    {
+        "name":  "@prisma/config",
+        "severity":  "high",
+        "isDirect":  false,
+        "fixAvailable":  "prisma",
+        "effects":  "prisma",
+        "via":  "effect",
+        "range":  "\u003e=6.13.0-dev.1"
+    },
+    {
+        "name":  "@prisma/dev",
+        "severity":  "high",
+        "isDirect":  false,
+        "fixAvailable":  "prisma",
+        "effects":  "prisma",
+        "via":  "@hono/node-server,@mrleebo/prisma-ast,hono",
+        "range":  "\u003c=0.22.0"
+    },
+    {
+        "name":  "effect",
+        "severity":  "high",
+        "isDirect":  false,
+        "fixAvailable":  "prisma",
+        "effects":  "@prisma/config",
+        "via":  "effect",
+        "range":  "\u003c3.20.0"
+    },
+    {
+        "name":  "flatted",
+        "severity":  "high",
+        "isDirect":  false,
+        "fixAvailable":  true,
+        "effects":  "",
+        "via":  "flatted,flatted",
+        "range":  "\u003c=3.4.1"
+    },
+    {
+        "name":  "hono",
+        "severity":  "high",
+        "isDirect":  false,
+        "fixAvailable":  true,
+        "effects":  "",
+        "via":  "hono,hono,hono,hono,hono,hono,hono,hono,hono",
+        "range":  "\u003c=4.12.6"
+    },
+    {
+        "name":  "multer",
+        "severity":  "high",
+        "isDirect":  false,
+        "fixAvailable":  true,
+        "effects":  "@nestjs/platform-express",
+        "via":  "multer",
+        "range":  "\u003c2.1.1"
+    },
+    {
+        "name":  "prisma",
+        "severity":  "high",
+        "isDirect":  true,
+        "fixAvailable":  "prisma",
+        "effects":  "",
+        "via":  "@prisma/config,@prisma/dev",
+        "range":  "\u003e=6.13.0-dev.1"
+    },
+    {
+        "name":  "@angular-devkit/core",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  "@nestjs/schematics",
+        "effects":  "@angular-devkit/schematics,@angular-devkit/schematics-cli,@nestjs/cli,@nestjs/schematics",
+        "via":  "ajv",
+        "range":  "12.0.0-next.0 - 19.2.21 || 20.0.0-next.0 - 20.3.17 || 21.0.0-next.0 - 21.1.4 || 21.2.0-next.0 - 21.2.0-rc.2"
+    },
+    {
+        "name":  "@angular-devkit/schematics",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  true,
+        "effects":  "",
+        "via":  "@angular-devkit/core",
+        "range":  "12.0.0-next.0 - 19.2.21 || 20.0.0-next.0 - 20.3.17 || 21.0.0-next.0 - 21.1.4 || 21.2.0-next.0 - 21.2.0-rc.2"
+    },
+    {
+        "name":  "@angular-devkit/schematics-cli",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  true,
+        "effects":  "",
+        "via":  "@angular-devkit/core,@angular-devkit/schematics",
+        "range":  "0.1200.0-next.0 - 19.2.21 || 20.0.0-next.0 - 20.3.17 || 21.0.0-next.0 - 21.1.4 || 21.2.0-next.0 - 21.2.0-rc.2"
+    },
+    {
+        "name":  "@chevrotain/cst-dts-gen",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  true,
+        "effects":  "",
+        "via":  "@chevrotain/gast,lodash",
+        "range":  "10.0.0 - 10.5.0"
+    },
+    {
+        "name":  "@chevrotain/gast",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  true,
+        "effects":  "",
+        "via":  "lodash",
+        "range":  "\u003c=10.5.0"
+    },
+    {
+        "name":  "@mrleebo/prisma-ast",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  "prisma",
+        "effects":  "@prisma/dev",
+        "via":  "chevrotain",
+        "range":  "0.4.2 - 0.13.1"
+    },
+    {
+        "name":  "@nestjs/cli",
+        "severity":  "moderate",
+        "isDirect":  true,
+        "fixAvailable":  "@nestjs/cli",
+        "effects":  "",
+        "via":  "@angular-devkit/core,@angular-devkit/schematics,@angular-devkit/schematics-cli,@nestjs/schematics",
+        "range":  "8.0.0 - 11.0.16"
+    },
+    {
+        "name":  "@nestjs/common",
+        "severity":  "moderate",
+        "isDirect":  true,
+        "fixAvailable":  true,
+        "effects":  "",
+        "via":  "file-type",
+        "range":  "10.4.16 - 10.4.22 || 11.0.16 - 11.1.16 || \u003e=12.0.0-alpha.0"
+    },
+    {
+        "name":  "@nestjs/schematics",
+        "severity":  "moderate",
+        "isDirect":  true,
+        "fixAvailable":  "@nestjs/schematics",
+        "effects":  "",
+        "via":  "@angular-devkit/core,@angular-devkit/schematics",
+        "range":  "8.0.0 - 11.0.9"
+    },
+    {
+        "name":  "ajv",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  "@nestjs/schematics",
+        "effects":  "@angular-devkit/core",
+        "via":  "ajv",
+        "range":  "7.0.0-alpha.0 - 8.17.1"
+    },
+    {
+        "name":  "chevrotain",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  "prisma",
+        "effects":  "@mrleebo/prisma-ast",
+        "via":  "@chevrotain/cst-dts-gen,@chevrotain/gast,lodash",
+        "range":  "10.0.0 - 10.5.0"
+    },
+    {
+        "name":  "file-type",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  true,
+        "effects":  "@nestjs/common",
+        "via":  "file-type,file-type",
+        "range":  "13.0.0 - 21.3.1"
+    },
+    {
+        "name":  "lodash",
+        "severity":  "moderate",
+        "isDirect":  false,
+        "fixAvailable":  "prisma",
+        "effects":  "@chevrotain/cst-dts-gen,@chevrotain/gast,chevrotain",
+        "via":  "lodash",
+        "range":  "4.0.0 - 4.17.21"
+    }
+]
