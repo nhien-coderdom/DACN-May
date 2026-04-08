@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useProductCategories } from '../hook'
 import type { Product, CreateProductDTO, UpdateProductDTO } from '../types'
+import CloudinaryUpload from './CloudinaryUpload'
 
 interface ProductFormProps {
   initialData?: Product | null
@@ -167,14 +168,18 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
       {/* =================== FIELD: IMAGE URL =================== */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">Image URL</label>
-        <input
-          type="url"
-          name="imageUrl"
-          value={formData.imageUrl}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="https://example.com/image.jpg"
-        />
+        <CloudinaryUpload 
+          onUpload={(url) => setFormData(prev => ({ ...prev, imageUrl: url }))}
+      />
+
+      {formData.imageUrl && (
+        <div>
+          <img 
+            src={formData.imageUrl}
+            className="mt-4 h-40 w-full object-cover rounded border"
+          />
+        </div>
+      )}
       </div>
 
       {/* =================== BUTTONS =================== */}
