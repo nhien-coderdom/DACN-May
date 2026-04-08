@@ -1,24 +1,28 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, Matches, IsOptional } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @MinLength(6)
   @Matches(/^(?=.*[A-Z])(?=.*\d).+$/, {
     message: " Mat khau phai chua it nhat 1 chu cai in hoa va 1 chu so",
   })
-  password: string;
+  password!: string;
 
   @IsString()
   @IsNotEmpty()
   @Matches(/^0\d{9}$/, {
     message: "Số điện thoại không hợp lệ",
   })
-  phone: string
+  phone!: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
 }

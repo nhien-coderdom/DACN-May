@@ -3,12 +3,22 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3000/auth";
 
+export type UserRole = 'ADMIN' | 'STAFF' | 'CUSTOMER';
+
+export type LoyaltyTier = 'NORMAL' | 'SILVER' | 'GOLD' | 'PLATINUM';
+
 export type User = {
   id: number;
   email: string;
   name: string;
-  role: string;
+  role: UserRole;
   phone?: string | null;
+  address?: string | null;
+  createdAt?: string;
+  loyaltyPoint?: number;
+  loyaltyTier?: LoyaltyTier;
+  totalOrders: number;
+  totalSpent: number;
 };
 
 type AuthContextType = {
@@ -17,12 +27,6 @@ type AuthContextType = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (
-    email: string,
-    name: string,
-    password: string,
-    phone?: string
-  ) => Promise<void>;
   fetchMe: () => Promise<void>;
   updateUserInfo: (updates: Partial<User>) => void;
   changePassword: (oldPassword: string, newPassword: string) => Promise<void>;
@@ -126,28 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  const register = async (
-    email: string,
-    name: string,
-    password: string,
-    phone?: string
-  ) => {
-    try {
-      await axios.post(`${API_URL}/register`, {
-        email,
-        name,
-        password,
-        phone,
-      });
-
-      // đăng ký xong auto login
-      await login(email, password);
-    } catch (error) {
-      console.error("register failed:", error);
-      throw error;
-    }
-  };
-
   const updateUserInfo = (updates: Partial<User>) => {
     setUser((prev) => (prev ? { ...prev, ...updates } : null));
   };
@@ -187,7 +169,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         login,
         logout,
-        register,
         fetchMe,
         updateUserInfo,
         changePassword,

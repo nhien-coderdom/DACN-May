@@ -1,16 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiLogOut, FiEdit2, FiCheck, FiX, FiAward, FiTrendingUp } from "react-icons/fi";
-import { useAuth } from "../contexts/AuthContext";
+import { FiLogOut, FiEdit2, FiCheck, FiX } from "react-icons/fi";
+import { useAuth } from "../../contexts/AuthContext";
+import { useProfile, useUpdateProfile } from "../hooks";
+import { LoyaltyCard } from "../components";
 
 function Profile() {
   const navigate = useNavigate();
-  const { user, logout, updateUserInfo } = useAuth();
+  const { user, logout } = useAuth();
+  const token = localStorage.getItem("access_token");
+  
+  const { data: profileData, isLoading } = useProfile(token);
+  const { mutate: updateProfile } = useUpdateProfile(token);
+  
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || "",
-    phone: user?.phone || "",
+    name: profileData?.name || "",
+    phone: profileData?.phone || "",
+    address: profileData?.address || "",
   });
+
+  // Cập nhật form khi profileData load xong
+  useEffect(() => {
+    if (profileData) {
+      setFormData({
+        name: profileData.name,
+        phone: profileData.phone,
+        address: profileData.address || "",
+      });
+    }
+  }, [profileData]);
 
   if (!user) {
     return (
@@ -28,12 +47,25 @@ function Profile() {
     );
   }
 
+  const displayUser = profileData || user;
+
   const handleSave = () => {
-    updateUserInfo({
-      fullName: formData.fullName,
-      phone: formData.phone,
-    });
-    setIsEditing(false);
+    updateProfile(
+      {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+      },
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+        },
+        onError: (error: any) => {
+          console.error('Update profile failed:', error);
+          alert(error?.response?.data?.message || 'Cập nhật thất bại');
+        },
+      }
+    );
   };
 
   const handleLogout = () => {
@@ -43,6 +75,10 @@ function Profile() {
 
   const formatPrice = (value: number) =>
     new Intl.NumberFormat("vi-VN").format(value) + "đ";
+
+  if (isLoading) {
+    return <div className="text-center py-12">Đang tải...</div>;
+  }
 
   return (
     <div className="mx-auto w-full max-w-7xl py-8 sm:py-12">
@@ -81,9 +117,9 @@ function Profile() {
                   </label>
                   <input
                     type="text"
-                    value={formData.fullName}
+                    value={formData.name}
                     onChange={(e) =>
-                      setFormData({ ...formData, fullName: e.target.value })
+                      setFormData({ ...formData, name: e.target.value })
                     }
                     className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                   />
@@ -98,6 +134,20 @@ function Profile() {
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
+                    }
+                    className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                    Địa chỉ
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
                     }
                     className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                   />
@@ -127,7 +177,7 @@ function Profile() {
                     Tên
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {user.fullName}
+                    {displayUser.name}
                   </p>
                 </div>
 
@@ -136,7 +186,7 @@ function Profile() {
                     Email
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {user.email}
+                    {displayUser.email}
                   </p>
                 </div>
 
@@ -145,7 +195,16 @@ function Profile() {
                     Số điện thoại
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {user.phone || "Chưa cập nhật"}
+                    {displayUser.phone || "Chưa cập nhật"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                    Địa chỉ
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-neutral-900">
+                    {displayUser.address || "Chưa cập nhật"}
                   </p>
                 </div>
 
@@ -154,7 +213,10 @@ function Profile() {
                     Thành viên từ
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {new Date(user.joinedAt).toLocaleDateString("vi-VN")}
+                    {displayUser.createdAt 
+                      ? new Date(displayUser.createdAt).toLocaleDateString("vi-VN")
+                      : "Chưa cập nhật"
+                    }
                   </p>
                 </div>
               </div>
@@ -180,75 +242,7 @@ function Profile() {
         </div>
 
         {/* Loyalty Points Card */}
-        <div className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-orange-50 to-orange-100 p-6 sm:p-8 shadow-sm">
-          <h2 className="text-xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
-            <FiAward className="text-orange-500" size={24} />
-            Điểm tích lũy
-          </h2>
-
-          {/* Points Display */}
-          <div className="mb-8 rounded-xl bg-white/80 border border-orange-200 p-6 text-center backdrop-blur">
-            <p className="text-xs font-semibold text-orange-600 uppercase tracking-wider">
-              Điểm hiện tại
-            </p>
-            <p className="mt-2 text-5xl font-black text-orange-500">
-              {user.loyaltyPoints.toLocaleString()}
-            </p>
-            <p className="mt-1 text-sm text-neutral-600">
-              pts
-            </p>
-          </div>
-
-          {/* Points Info */}
-          <div className="space-y-4 rounded-lg bg-white/60 p-4 backdrop-blur">
-            <div className="flex items-start gap-3">
-              <div className="mt-1 rounded-full bg-orange-200 p-1">
-                <FiTrendingUp className="text-orange-600" size={16} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-neutral-900">
-                  Cách kiếm điểm
-                </p>
-                <p className="text-xs text-neutral-600 mt-1">
-                  Mỗi 1.000đ = 1 điểm tích lũy
-                </p>
-              </div>
-            </div>
-
-            <div className="border-t border-neutral-200 my-3 pt-3">
-              <div className="flex items-start gap-3">
-                <div className="mt-1 rounded-full bg-green-200 p-1">
-                  <FiCheck className="text-green-600" size={16} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-neutral-900">
-                    Sử dụng điểm
-                  </p>
-                  <p className="text-xs text-neutral-600 mt-1">
-                    1.000 điểm = 10.000đ giảm giá
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="mt-8 border-t border-orange-200 pt-6">
-            <div className="mb-3">
-              <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wider">
-                Tổng chi tiêu
-              </p>
-              <p className="mt-1 text-2xl font-bold text-neutral-900">
-                {formatPrice(user.totalSpent)}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs text-neutral-600">
-              <div className="h-1 flex-1 rounded-full bg-orange-300"></div>
-              <span>Tiếp tục mua sắm</span>
-            </div>
-          </div>
-        </div>
+        <LoyaltyCard user={displayUser} formatPrice={formatPrice} />
       </div>
     </div>
   );
