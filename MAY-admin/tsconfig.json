@@ -9,6 +9,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "moduleResolution": "node" 
+    "moduleResolution": "node" ,
+    "types": ["@types/cloudinary-uploadwidget-browser"]
   }
 }
