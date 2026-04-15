@@ -88,7 +88,7 @@ function Checkout() {
         </h1>
         <button
           onClick={() => navigate("/")}
-          className="rounded-full bg-orange-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+          className="rounded-full bg-[#6c935b] px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
         >
           Quay về trang chủ
         </button>
@@ -114,9 +114,9 @@ function Checkout() {
               <div
                 className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full font-bold text-xs sm:text-sm transition ${
                   s < step
-                    ? "bg-orange-400 text-white"
+                    ? "bg-[#6c935b] text-white"
                     : s === step
-                    ? "bg-orange-400 text-white ring-4 ring-orange-100"
+                    ? "bg-[#6c935b] text-white ring-4 ring-orange-100"
                     : "bg-neutral-200 text-neutral-600"
                 }`}
               >
@@ -301,7 +301,7 @@ function Checkout() {
                 {user && user.loyaltyPoints > 0 && (
                   <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6 sm:p-8">
                     <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                      <FiAward className="text-orange-500" size={20} />
+                      <FiAward className="text-[#086136]" size={20} />
                       Sử dụng điểm tích lũy
                     </h2>
 
@@ -404,7 +404,7 @@ function Checkout() {
               )}
               <button
                 type="submit"
-                className="flex-1 rounded-lg bg-orange-400 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+                className="flex-1 rounded-lg bg-[#6c935b] py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
               >
                 {step === 3 ? "Đặt hàng" : "Tiếp tục"}
               </button>
@@ -461,7 +461,7 @@ function Checkout() {
 
           <div className="mt-4 flex justify-between">
             <span className="font-bold text-neutral-900">Tổng cộng</span>
-            <span className="text-2xl sm:text-3xl font-bold text-orange-500">
+            <span className="text-2xl sm:text-3xl font-bold text-[#086136]">
               {formatPrice(finalAmount)}
             </span>
           </div>

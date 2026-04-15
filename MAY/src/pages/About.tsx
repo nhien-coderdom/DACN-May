@@ -69,7 +69,7 @@ function About() {
             <div className="mt-8 flex flex-wrap gap-4">
               <button
                 onClick={() => navigate("/products")}
-                className="rounded-full bg-orange-400 px-6 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:-translate-y-[2px] hover:bg-orange-500 hover:shadow-lg"
+                className="rounded-full bg-[#6c935b] px-6 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:-translate-y-[2px] hover:bg-orange-500 hover:shadow-lg"
               >
                 Khám phá menu
               </button>
@@ -148,7 +148,7 @@ function About() {
                 className="group rounded-[24px] border border-orange-100 bg-white/85 p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-400 transition-all duration-300 group-hover:bg-orange-400 group-hover:text-white">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-400 transition-all duration-300 group-hover:bg-[#6c935b] group-hover:text-white">
                     {item.icon}
                   </div>
 
@@ -188,7 +188,7 @@ function About() {
               key={index}
               className="rounded-[30px] bg-white p-7 shadow-md transition-all duration-300 hover:-translate-y-[2px] hover:shadow-lg"
             >
-              <div className="mb-4 h-[3px] w-12 rounded-full bg-orange-400" />
+              <div className="mb-4 h-[3px] w-12 rounded-full bg-[#6c935b]" />
               <h3 className="text-2xl font-black text-neutral-900">
                 {item.title}
               </h3>
@@ -217,7 +217,7 @@ function About() {
 
           <button
             onClick={() => navigate("/products")}
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-bold text-orange-500 shadow-md transition-all duration-300 hover:-translate-y-[2px] hover:bg-orange-50 hover:shadow-lg"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-bold text-[#086136] shadow-md transition-all duration-300 hover:-translate-y-[2px] hover:bg-orange-50 hover:shadow-lg"
           >
             Xem sản phẩm
             <FiArrowRight size={16} />

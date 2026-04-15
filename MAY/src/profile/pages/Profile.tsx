@@ -39,7 +39,7 @@ function Profile() {
         </h1>
         <button
           onClick={() => navigate("/login")}
-          className="rounded-full bg-orange-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+          className="rounded-full bg-[#6c935b] px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
         >
           Đăng nhập
         </button>
@@ -101,7 +101,7 @@ function Profile() {
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-2 rounded-lg bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-100"
+                  className="flex items-center gap-2 rounded-lg bg-orange-50 px-3 py-2 text-sm font-semibold text-[#086136] transition hover:bg-orange-100"
                 >
                   <FiEdit2 size={16} />
                   Chỉnh sửa
@@ -156,7 +156,7 @@ function Profile() {
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleSave}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-orange-400 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#6c935b] py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
                   >
                     <FiCheck size={16} />
                     Lưu

@@ -43,7 +43,7 @@ function Cart() {
 
           <button
             onClick={() => navigate("/")}
-            className="mt-6 rounded-full bg-orange-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+            className="mt-6 rounded-full bg-[#6c935b] px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
           >
             Tiếp tục mua sắm
           </button>
@@ -70,7 +70,7 @@ function Cart() {
                           {item.title}
                         </h3>
 
-                        <p className="mt-1 text-sm font-semibold text-orange-500">
+                        <p className="mt-1 text-sm font-semibold text-[#086136]">
                           {formatPrice(item.price)}
                         </p>
 
@@ -142,7 +142,7 @@ function Cart() {
               <span className="text-base font-semibold text-neutral-900">
                 Tổng cộng
               </span>
-              <span className="text-2xl font-bold text-orange-500">
+              <span className="text-2xl font-bold text-[#086136]">
                 {formatPrice(total)}
               </span>
             </div>
@@ -153,7 +153,7 @@ function Cart() {
 
             <button
               onClick={() => navigate("/checkout")}
-              className="mt-6 w-full rounded-full bg-orange-400 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+              className="mt-6 w-full rounded-full bg-[#6c935b] py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
             >
               Tiến hành thanh toán
             </button>

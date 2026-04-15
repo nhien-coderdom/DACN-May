@@ -5,7 +5,9 @@ type DrinkCardProps = {
   categoryName?: string; // tên danh mục
   image: string;         // link ảnh sản phẩm
   price: number;         // giá sản phẩm
-  isActive: boolean;    
+  isActive: boolean;
+
+  isBestSeller?: boolean;
 };
 
 // component DrinkCard nhận props từ bên ngoài
@@ -16,20 +18,20 @@ function DrinkCard({
   image,
   price,
   isActive,
+  isBestSeller,
 }: DrinkCardProps) {
-  
+
   const formattedPrice = new Intl.NumberFormat("vi-VN").format(price) + "đ";
 
   return (
     <div
-      className={`relative flex flex-col w-[240px] sm:w-[280px] rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 ${
-        isActive
-          ? "bg-white shadow-2xl ring-2 ring-orange-200"
+      className={`relative h-full flex flex-col w-60 sm:w-70 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 ${isActive
+          ? "bg-white shadow-2xl ring-2 ring-[#6cb08f]"
           : "bg-neutral-100/50 shadow-md opacity-75"
-      }`}
+        }`}
     >
       {/* phần ảnh sản phẩm */}
-      <div className="relative overflow-hidden rounded-t-2xl sm:rounded-t-3xl flex-shrink-0 h-[120px] sm:h-[150px]">
+      <div className="relative overflow-hidden rounded-t-2xl sm:rounded-t-3xl shrink-0 h-30 sm:h-37.5">
         <img
           src={image}       // ảnh lấy từ props
           className="h-full w-full object-cover"
@@ -37,13 +39,19 @@ function DrinkCard({
 
         {/* nếu có categoryName thì hiện nhãn danh mục ở góc trên ảnh */}
         {categoryName && (
-          <span className="absolute left-3 top-3 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold bg-orange-400 text-white">
+          <span className="absolute left-3 top-3 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold bg-[#6c935b] text-white">
             {categoryName}
+          </span>
+        )}
+
+        {isBestSeller && (
+          <span className="absolute right-3 top-3 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-bold bg-red-500 text-white shadow-md">
+            BEST SELLER
           </span>
         )}
       </div>
 
-      <div className="p-3 sm:p-4 flex flex-col flex-grow">
+      <div className="p-3 sm:p-4 flex flex-col grow">
         {/* tên sản phẩm */}
         <h3 className="font-extrabold text-xs sm:text-sm text-neutral-700 uppercase tracking-wide">
           {name}
@@ -51,25 +59,21 @@ function DrinkCard({
 
         {/* mô tả sản phẩm
             nếu không có description thì hiện câu mặc định */}
-        <p className="mt-1.5 text-xs leading-4 text-neutral-600 flex-grow line-clamp-2">
+        <p className="mt-1.5 text-xs leading-4 text-neutral-600 grow line-clamp-2">
           {description || "Đồ uống được pha chế tại MAY."}
         </p>
 
         {/* giá sản phẩm */}
-        <p className="mt-2 text-xs font-bold text-orange-500">
+        <p className="mt-2 text-xs font-bold text-[#086136]">
           {formattedPrice}
         </p>
 
-        <div className="mt-3 flex justify-center gap-1.5 flex-shrink-0">
+        <div className="mt-3 flex justify-center gap-1.5 shrink-0">
           {/* nút order */}
-          <button className="rounded-full bg-orange-400 px-4 sm:px-5 py-1.5 text-xs font-bold text-white hover:bg-orange-500 transition flex-1">
-            ORDER
+          <button className="rounded-full bg-[#f59f9f] px-4 sm:px-5 py-1.5 text-xs font-bold text-[#086136] hover:bg-[#f2e5e5] transition flex-1">
+            Add to cart
           </button>
 
-          {/* nút explore */}
-          <button className="rounded-full border-2 border-neutral-300 px-4 sm:px-5 py-1.5 text-xs text-neutral-700 font-bold hover:border-neutral-400 transition flex-1">
-            EXPLORE
-          </button>
         </div>
       </div>
     </div>

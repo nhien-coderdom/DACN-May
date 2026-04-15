@@ -1,17 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Hero from "../components/Hero";
+import DrinkCard from "../components/DrinkCard";
 import { useProducts } from "../hooks/useProducts";
 import { useCategories } from "../hooks/useCategories";
+import { useBestSellingProducts } from "../hooks/useBestSellingProducts";
 
-const toSlug = (value: string) =>
-  value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+const fallbackImage =
+  "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=80";
+
+const PAGE_SIZE = 6;
 
 function ProductsPage() {
   const { category } = useParams();
@@ -19,124 +16,221 @@ function ProductsPage() {
   const { products, loading, error } = useProducts();
   const { categories } = useCategories();
 
-  const filteredDrinks = useMemo(() => {
-    if (!category) {
-      return products;
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(category || "all");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const { bestSellingProducts } = useBestSellingProducts();
+  const bestSellerSet = new Set(bestSellingProducts.map((p) => p.id));
+
+  // FILTER
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+
+    if (selectedCategory && selectedCategory !== "all") {
+      result = result.filter(
+        (p) => p.category?.slug === selectedCategory
+      );
     }
 
-    const currentCategorySlug = category.toLowerCase();
+    if (search) {
+      result = result.filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
 
-    return products.filter((product) => {
-      const productCategory = product.category;
-      if (!productCategory) {
-        return false;
-      }
+    if (minPrice) {
+      result = result.filter((p) => p.price >= Number(minPrice));
+    }
 
-      const productCategorySlug = productCategory.slug
-        ? productCategory.slug.toLowerCase()
-        : toSlug(productCategory.name);
+    if (maxPrice) {
+      result = result.filter((p) => p.price <= Number(maxPrice));
+    }
 
-      return productCategorySlug === currentCategorySlug;
-    });
-  }, [category, products]);
+    return result;
+  }, [products, selectedCategory, search, minPrice, maxPrice]);
 
-  const formatPrice = (value: number) =>
-    new Intl.NumberFormat("vi-VN").format(value) + "đ";
+  // RESET PAGE WHEN FILTER CHANGE
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, search, minPrice, maxPrice]);
 
-  const categoryButtons = useMemo(
-    () => [{ id: 0, slug: "all", name: "All" }, ...categories],
-    [categories]
-  );
+  // PAGINATION
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
 
-  
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredProducts.slice(start, start + PAGE_SIZE);
+  }, [filteredProducts, currentPage]);
+
   return (
     <div>
-       <div className="py-1 sm:py-2">
-        <Hero />
-      </div>
-      {/* Category Filter Buttons */}
-      <div className="mb-8 flex flex-wrap justify-center gap-3 px-4 sm:gap-4">
-        {categoryButtons.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => {
-              if (cat.slug === "all") {
-                navigate("/products");
-              } else {
-                navigate(`/products/${cat.slug}`);
-              }
-            }}
-            className={`rounded-full px-6 py-2 font-semibold transition ${
-              (!category && cat.slug === "all") || category === cat.slug
-                ? "bg-orange-400 text-white shadow-md hover:bg-orange-500"
-                : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-            }`}
-          >
-            {cat.name}
-          </button>
-        ))}
+      {/* TITLE */}
+      <div className="mb-6 text-center mt-25">
+        <h2 className="mt-1 text-2xl sm:text-5xl font-black text-neutral-700">
+          Our Products
+        </h2>
       </div>
 
-      {loading && (
-        <div className="rounded-[28px] bg-white p-6 sm:p-10 text-center shadow-lg mx-4 sm:mx-0">
-          <p className="text-neutral-600">Đang tải sản phẩm...</p>
-        </div>
-      )}
+      {/* LAYOUT */}
+      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        {/* LEFT FILTER */}
+        <div className="lg:col-span-1 bg-white rounded-2xl shadow p-4 h-fit w-full max-w-[280px] mx-auto">
+          <h3 className="font-semibold text-lg mb-4">Search</h3>
 
-      {error && !loading && (
-        <div className="rounded-[28px] bg-white p-6 sm:p-10 text-center shadow-lg mx-4 sm:mx-0">
-          <h2 className="text-2xl font-bold text-neutral-800">Không thể tải sản phẩm</h2>
-          <p className="mt-2 text-neutral-600">{error}</p>
-        </div>
-      )}
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full mb-4 px-3 py-2 border rounded-lg"
+          />
 
-      {!loading && !error && filteredDrinks.length === 0 ? (
-        <div className="rounded-[28px] bg-white p-6 sm:p-10 text-center shadow-lg mx-4 sm:mx-0">
-          <h2 className="text-2xl font-bold text-neutral-800">
-            Không có sản phẩm trong danh mục này
-          </h2>
-          <button
-            onClick={() => navigate("/")}
-            className="mt-4 rounded-full bg-orange-400 px-5 py-2 text-sm font-semibold text-white transition hover:bg-orange-500"
-          >
-            Quay về trang chủ
-          </button>
-        </div>
-      ) : !loading && !error ? (
-        <div className="grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 px-4 sm:px-0">
-          {filteredDrinks.map((drink) => (
+          <h3 className="font-semibold text-lg mb-3">Categories</h3>
+          <div className="flex flex-col gap-2 mb-4">
             <button
-              key={drink.id}
-              onClick={() => navigate(`/product/${drink.id}`)}
-              className="overflow-hidden rounded-[26px] border border-neutral-200 bg-white text-left shadow-sm transition hover:-translate-y-[2px] hover:shadow-md"
+              onClick={() => setSelectedCategory("all")}
+              className={`text-left px-3 py-2 rounded ${
+                selectedCategory === "all"
+                  ? "bg-[#6c935b] text-white"
+                  : "bg-neutral-100"
+              }`}
             >
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={drink.imageUrl || "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=80"}
-                  className="h-full w-full object-cover"
-                />
-                {drink.category?.name && (
-                  <span className="absolute left-4 top-4 rounded-full bg-orange-400 px-3 py-1 text-xs font-semibold text-white">
-                    {drink.category.name}
-                  </span>
-                )}
+              All
+            </button>
+
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.slug)}
+                className={`text-left px-3 py-2 rounded ${
+                  selectedCategory === cat.slug
+                    ? "bg-[#6c935b] text-white"
+                    : "bg-neutral-100"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          <h3 className="font-semibold text-lg mb-3">Price</h3>
+          <div className="flex flex-col gap-2">
+            <input
+              type="number"
+              placeholder="Min"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="px-3 py-2 border rounded"
+            />
+            <input
+              type="number"
+              placeholder="Max"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="px-3 py-2 border rounded"
+            />
+          </div>
+        </div>
+
+        {/* RIGHT PRODUCT */}
+        <div className="lg:col-span-3">
+          
+          {loading && (
+            <div className="text-center py-10 text-neutral-500">
+              Loading products...
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-10 text-neutral-500">
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && filteredProducts.length === 0 && (
+            <div className="text-center py-10 text-neutral-500">
+              Không tìm thấy sản phẩm
+            </div>
+          )}
+
+          {!loading && !error && filteredProducts.length > 0 && (
+            <>
+              {/* GRID */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {paginatedProducts.map((drink) => (
+                  <div
+                    key={drink.id}
+                    onClick={() => navigate(`/product/${drink.id}`)}
+                    className="cursor-pointer transition sm:hover:scale-105 hover:z-10"
+                  >
+                    <DrinkCard
+                      name={drink.name}
+                      description={drink.description}
+                      categoryName={drink.category?.name}
+                      image={drink.imageUrl || fallbackImage}
+                      price={drink.price}
+                      isActive={false}
+                      isBestSeller={bestSellerSet.has(drink.id)}
+                    />
+                  </div>
+                ))}
               </div>
 
-              <div className="p-5">
-                <h3 className="text-lg font-bold text-neutral-800">
-                  {drink.name}
-                </h3>
-                <p className="mt-3 line-clamp-2 text-sm leading-6 text-neutral-600">
-                  {drink.description}
-                </p>
-                <p className="mt-4 text-lg font-bold text-orange-500">
-                  {formatPrice(drink.price)}
-                </p>
-              </div>
-            </button>
-          ))}
+              {/* PAGINATION */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+                  
+                  {/* Prev */}
+                  <button
+                    onClick={() =>
+                      setCurrentPage((p) => Math.max(p - 1, 1))
+                    }
+                    className="px-3 py-1 border rounded disabled:opacity-50"
+                    disabled={currentPage === 1}
+                  >
+                    Prev
+                  </button>
+
+                  {/* Page numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded ${
+                          currentPage === page
+                            ? "bg-[#6c935b] text-white"
+                            : "border"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
+
+                  {/* Next */}
+                  <button
+                    onClick={() =>
+                      setCurrentPage((p) =>
+                        Math.min(p + 1, totalPages)
+                      )
+                    }
+                    className="px-3 py-1 border rounded disabled:opacity-50"
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

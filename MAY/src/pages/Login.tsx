@@ -105,7 +105,7 @@ function Login() {
               </label>
               <a
                 href="#"
-                className="text-orange-400 hover:text-orange-500 transition font-medium"
+                className="text-orange-400 hover:text-[#086136] transition font-medium"
               >
                 Quên mật khẩu?
               </a>
@@ -115,7 +115,7 @@ function Login() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-lg bg-orange-400 py-3 text-sm font-bold text-white transition hover:bg-orange-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-lg bg-[#6c935b] py-3 text-sm font-bold text-white transition hover:bg-orange-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
@@ -126,7 +126,7 @@ function Login() {
             Chưa có tài khoản?{" "}
             <Link
               to="/register"
-              className="font-semibold text-orange-400 hover:text-orange-500 transition"
+              className="font-semibold text-orange-400 hover:text-[#086136] transition"
             >
               Đăng ký ngay
             </Link>

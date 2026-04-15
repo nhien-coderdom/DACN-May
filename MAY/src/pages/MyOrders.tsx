@@ -38,7 +38,7 @@ function MyOrders() {
       case "PREPARING":
         return <FiPackage className="text-sky-500" size={16} />;
       case "SHIPPING":
-        return <FiTruck className="text-orange-500" size={16} />;
+        return <FiTruck className="text-[#086136]" size={16} />;
       case "DELIVERED":
         return <FiCheckCircle className="text-emerald-500" size={16} />;
       case "CANCELLED":
@@ -145,7 +145,7 @@ function MyOrders() {
       case "PREPARING":
         return "bg-violet-400";
       case "SHIPPING":
-        return "bg-orange-400";
+        return "bg-[#6c935b]";
       case "DELIVERED":
         return "bg-emerald-500";
       case "CANCELLED":
@@ -283,7 +283,7 @@ function MyOrders() {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
                         Tổng thanh toán
                       </p>
-                      <p className="mt-1 text-2xl font-extrabold text-orange-500">
+                      <p className="mt-1 text-2xl font-extrabold text-[#086136]">
                         {formatPrice(order.total)}
                       </p>
                     </div>
