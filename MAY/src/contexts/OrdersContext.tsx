@@ -35,7 +35,7 @@ export type OrderItem = {
   product?: {
     id: number;
     name: string;
-    image?: string | null;
+    imageUrl?: string | null;
   };
 };
 

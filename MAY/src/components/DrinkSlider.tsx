@@ -71,18 +71,19 @@ function DrinkSlider() {
   return (
     <section className="w-full h-full flex flex-col justify-center mt-20">
       <div className="mb-6 text-center">
-      <h2 className="mt-1 text-lg sm:text-2xl font-black text-neutral-700">
-        Best seller
-      </h2>
+        <h2 className="mt-1 text-lg sm:text-2xl font-black text-neutral-700">
+          Best seller
+        </h2>
 
-      <p className="mt-1 text-xs sm:text-sm text-neutral-500">
-        Our top 5 best-selling products
-      </p>
+        <p className="mt-1 text-xs sm:text-sm text-neutral-500">
+          Our top 5 best-selling products
+        </p>
       </div>
-      <div className="relative flex items-center justify-center gap-2 sm:gap-4 px-2 sm:px-4">
+      <div className="flex items-center justify-center gap-2 sm:gap-4 px-2 sm:px-4">
+        <div className="relative">
         <button
           onClick={handlePrev}
-          className="absolute left-50 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center text-xl transition hover:scale-110 text-neutral-400 hover:text-neutral-900"
+          className="absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center text-xl transition hover:scale-110 text-neutral-400 hover:text-neutral-900"
         >
           <FiChevronLeft size={30} />
         </button>
@@ -91,11 +92,10 @@ function DrinkSlider() {
           {displayDrinks.map((drink, index) => (
             <div
               key={drink.id}
-              className={`cursor-pointer transition-all duration-500 ease-out ${
-                canSlide && index === 1
-                  ? "z-10 translate-y-0 scale-100 opacity-100"
-                  : "translate-y-3 scale-75 sm:scale-90 opacity-60 sm:opacity-70"
-              }`}
+              className={`cursor-pointer transition-all duration-500 ease-out ${canSlide && index === 1
+                ? "z-10 translate-y-0 scale-100 opacity-100"
+                : "translate-y-3 scale-75 sm:scale-90 opacity-60 sm:opacity-70"
+                }`}
               onClick={() => {
                 console.log("Clicked drink:", drink);
                 if (!drink.id) return;
@@ -109,7 +109,7 @@ function DrinkSlider() {
                 image={drink.imageUrl || fallbackImage}
                 price={drink.price}
                 isActive={canSlide ? index === 1 : true}
-                // isBestSeller={true}
+              // isBestSeller={true}
               />
             </div>
           ))}
@@ -117,10 +117,11 @@ function DrinkSlider() {
 
         <button
           onClick={handleNext}
-          className="absolute right-50 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center text-xl transition hover:scale-110 text-neutral-400 hover:text-neutral-900"
+          className="absolute s-right-4 sm:-right-6 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center text-xl transition hover:scale-110 text-neutral-400 hover:text-neutral-900"
         >
           <FiChevronRight size={30} />
         </button>
+        </div>
       </div>
 
       <div className="mt-2 sm:mt-3 flex items-center justify-center gap-1.5">
@@ -128,11 +129,10 @@ function DrinkSlider() {
           <button
             key={index}
             onClick={() => setActiveIndex(index)}
-            className={`rounded-full transition-all ${
-              index === safeIndex
-                ? "h-1.5 w-6 sm:w-8 bg-[#6c935b]"
-                : "h-1.5 w-1.5 bg-neutral-300 hover:bg-neutral-400"
-            }`}
+            className={`rounded-full transition-all ${index === safeIndex
+              ? "h-1.5 w-6 sm:w-8 bg-[#6c935b]"
+              : "h-1.5 w-1.5 bg-neutral-300 hover:bg-neutral-400"
+              }`}
           />
         ))}
       </div>

@@ -45,14 +45,14 @@ function About() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 lg:px-8 mt-20">
       <section className="relative rounded-[36px] bg-gradient-to-br from-white via-orange-50/30 to-neutral-100 px-6 py-10 shadow-xl md:px-10 md:py-14 lg:px-14">
         <div className="absolute -right-8 top-0 h-40 w-40 rounded-full bg-orange-200/20 blur-3xl" />
         <div className="absolute -left-8 bottom-0 h-40 w-40 rounded-full bg-orange-300/10 blur-3xl" />
 
         <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="max-w-2xl">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-orange-400">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-[#dd7484]">
               About MAY
             </p>
 
@@ -69,7 +69,7 @@ function About() {
             <div className="mt-8 flex flex-wrap gap-4">
               <button
                 onClick={() => navigate("/products")}
-                className="rounded-full bg-[#6c935b] px-6 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:-translate-y-[2px] hover:bg-orange-500 hover:shadow-lg"
+                className="rounded-full bg-[#6c935b] px-6 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:-translate-y-[2px] hover:bg-[#dd7484] hover:shadow-lg"
               >
                 Khám phá menu
               </button>
@@ -104,7 +104,7 @@ function About() {
 
       <section className="mt-14 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="rounded-[32px] bg-white p-8 shadow-lg transition-shadow duration-300 hover:shadow-xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-400">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#dd7484]">
             Our Story
           </p>
 
@@ -133,7 +133,7 @@ function About() {
         </div>
 
         <div className="rounded-[32px] bg-gradient-to-br from-orange-50 to-white p-8 shadow-lg transition-shadow duration-300 hover:shadow-xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-400">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#dd7484]">
             What Makes Us Different
           </p>
 
@@ -148,7 +148,7 @@ function About() {
                 className="group rounded-[24px] border border-orange-100 bg-white/85 p-5 shadow-sm transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-400 transition-all duration-300 group-hover:bg-[#6c935b] group-hover:text-white">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#f2e5e5] text-[#dd7484] transition-all duration-300 group-hover:bg-[#6c935b] group-hover:text-white">
                     {item.icon}
                   </div>
 
@@ -169,11 +169,11 @@ function About() {
 
       <section className="mt-14">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-orange-100 text-orange-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f2e5e5] text-[#dd7484]">
             <FiFeather size={18} />
           </div>
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-400">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#dd7484]">
               Core Values
             </p>
             <h2 className="font-serif text-3xl font-black text-neutral-900">
@@ -200,7 +200,7 @@ function About() {
         </div>
       </section>
 
-      <section className="mt-14 overflow-hidden rounded-[36px] bg-gradient-to-r from-orange-400 to-orange-500 px-8 py-12 text-white shadow-xl md:px-12">
+      <section className="mt-14 overflow-hidden rounded-[36px] bg-gradient-to-r from-[#dd7484] to-[#6c935b] px-8 py-12 text-white shadow-xl md:px-12">
         <div className="flex flex-col items-center text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-100">
             Ready to explore

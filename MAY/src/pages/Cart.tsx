@@ -14,7 +14,7 @@ function Cart() {
   const total = subtotal + shipping;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 mt-20">
       <section className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-400">
           Cart

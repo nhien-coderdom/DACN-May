@@ -33,7 +33,7 @@ function Profile() {
 
   if (!user) {
     return (
-      <div className="mx-auto w-full max-w-7xl px-4 py-12 text-center">
+      <div className="mx-auto w-full max-w-7xl px-4 py-12 text-center mt-20">
         <h1 className="text-2xl font-bold text-neutral-900 mb-4">
           Vui lòng đăng nhập
         </h1>
@@ -81,7 +81,7 @@ function Profile() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl py-8 sm:py-12">
+    <div className="mx-auto w-full max-w-7xl py-8 sm:py-12 mt-20">
       <div className="px-4 sm:px-0">
         <h1 className="font-serif text-4xl sm:text-5xl font-black text-neutral-900 mb-2">
           Tài khoản của tôi
