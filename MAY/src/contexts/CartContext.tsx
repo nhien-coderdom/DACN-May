@@ -32,6 +32,20 @@ const getCartStorageKey = (userId?: number) =>
   userId ? `${CART_STORAGE_PREFIX}_user_${userId}` : `${CART_STORAGE_PREFIX}_guest`;
 const GUEST_CART_STORAGE_KEY = getCartStorageKey();
 
+export const clearAllCartStorage = () => {
+  try {
+    const cartKeys = Object.keys(localStorage).filter(
+      (key) =>
+        key === GUEST_CART_STORAGE_KEY ||
+        key.startsWith(`${CART_STORAGE_PREFIX}_user_`)
+    );
+
+    cartKeys.forEach((key) => localStorage.removeItem(key));
+  } catch (error) {
+    console.error("Failed to clear cart storage:", error);
+  }
+};
+
 const isSameItem = (a: CartItem, b: CartItem) =>
   a.id === b.id && JSON.stringify(a.toppings ?? []) === JSON.stringify(b.toppings ?? []);
 

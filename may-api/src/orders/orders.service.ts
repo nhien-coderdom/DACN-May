@@ -33,7 +33,6 @@ export class OrdersService {
     'BANK_TRANSFER',
     'MOMO',
     'VNPAY',
-    'STRIPE',
   ];
 
   async findAll() {
@@ -246,6 +245,9 @@ export class OrdersService {
         include: this.orderInclude,
       });
 
+    }, {
+      maxWait: 10000,
+      timeout: 20000,
     });
 
     this.ordersGateway.emitNewOrder(createdOrder);

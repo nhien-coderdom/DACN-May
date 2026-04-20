@@ -1,6 +1,5 @@
 import axios from 'axios'
-import type { RegisterDTO, RegisterResponse, AuthResponse, User } from '../types'
-import { data } from 'react-router-dom'
+import type { RegisterDTO, RegisterResponse, AuthResponse } from '../types'
 
 
 const API_URL = import.meta.env.VITE_API_URL 
