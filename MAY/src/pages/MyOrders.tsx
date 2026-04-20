@@ -33,6 +33,7 @@ function MyOrders() {
     ? orders.filter((order) => order.userId === user.id)
     : [];
 
+
   /* ================= HELPERS ================= */
 
   const formatPrice = (value: number) =>
@@ -89,6 +90,16 @@ function MyOrders() {
         return "bg-gray-400";
     }
   };
+  const removeVietnameseTones = (str: string) => {
+    return str
+      .normalize("NFD") // tách dấu ra khỏi ký tự
+      .replace(/[\u0300-\u036f]/g, "") // xóa dấu
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .toLowerCase();
+  };
+
+  const normalizedSearch = removeVietnameseTones(search);
 
   /* ================= FILTER ================= */
 
@@ -96,7 +107,7 @@ function MyOrders() {
     const matchSearch =
       search === "" ||
       order.items.some((item) =>
-        item.productName.toLowerCase().includes(search.toLowerCase())
+        removeVietnameseTones(item.productName).includes(normalizedSearch)
       );
 
     const orderDate = new Date(order.createdAt).getTime();
@@ -157,6 +168,7 @@ function MyOrders() {
 
       {/* FILTER */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        {/* Search */}
         <input
           value={search}
           onChange={(e) => {
@@ -164,9 +176,18 @@ function MyOrders() {
             setSearch(e.target.value);
           }}
           placeholder="Tìm tên món..."
-          className="w-full rounded-xl border px-3 py-2 text-sm sm:w-1/2"
+          className="
+      w-full sm:w-1/2
+      rounded-xl border border-neutral-200
+      bg-white
+      px-4 py-2 text-sm
+      shadow-sm
+      placeholder:text-neutral-400
+      focus:border-[#f59f9f]
+    "
         />
 
+        {/* Date filters */}
         <div className="flex gap-2">
           <input
             type="date"
@@ -175,8 +196,18 @@ function MyOrders() {
               setPage(1);
               setFromDate(e.target.value);
             }}
-            className="rounded-xl border px-2 py-2 text-sm"
+            className="
+        rounded-xl border border-neutral-200
+        bg-[#fff5f5]
+        px-3 py-2 text-sm
+        shadow-sm
+        outline-none
+        transition-all duration-200
+        focus:border-[#f59f9f]
+        focus:ring-2 focus:ring-[#f59f9f]/30
+      "
           />
+
           <input
             type="date"
             value={toDate}
@@ -184,7 +215,16 @@ function MyOrders() {
               setPage(1);
               setToDate(e.target.value);
             }}
-            className="rounded-xl border px-2 py-2 text-sm"
+            className="
+        rounded-xl border border-neutral-200
+        bg-[#fff5f5]
+        px-3 py-2 text-sm
+        shadow-sm
+        outline-none
+        transition-all duration-200
+        focus:border-[#f59f9f]
+        focus:ring-2 focus:ring-[#f59f9f]/30
+      "
           />
         </div>
       </div>
@@ -267,20 +307,43 @@ function MyOrders() {
                 <div className="space-y-3">
                   {selectedOrder.items.map((item) => {
                     console.log("Item:", item);
-                    return (<div key={item.id} className="flex justify-between rounded-xl bg-neutral-50 p-3" >
-                      <div>
-                        <img src={item.product?.imageUrl || "/placeholder.png"} alt={item.productName} className="h-16 w-16 rounded-lg object-cover" />
-                      </div>
-                      <div>
+                    return (<div
+                      key={item.id}
+                      className="flex items-start gap-3 rounded-xl bg-neutral-50 p-3"
+                    >
+                      {/* Image */}
+                      <img
+                        src={item.product?.imageUrl || "/placeholder.png"}
+                        alt={item.productName}
+                        className="h-16 w-16 rounded-lg object-cover"
+                      />
+
+                      {/* Content */}
+                      <div className="flex-1 text-left">
                         <p className="font-semibold">{item.productName}</p>
-                        {item.toppings.length > 0 && (<p className="text-xs text-neutral-500"> +{" "}
-                          {item.toppings.map((t) => t.toppingName).join(", ")}
-                        </p>)}
-                        <p className="text-xs text-neutral-500"> SL: {item.quantity} </p>
+
+                        {item.toppings.length > 0 && (
+                          <p className="text-xs text-neutral-500">
+                            + {item.toppings.map((t) => t.toppingName).join(", ")}
+                          </p>
+                        )}
+
+                        <p className="text-xs text-neutral-500">
+                          SL: {item.quantity}
+                        </p>
                       </div>
-                      <p className="font-semibold"> {formatPrice(getOrderItemTotal(item))} </p>
-                    </div>);
-                  })} </div> </div> {/* INFO */}
+
+                      {/* Price */}
+                      <p className="font-semibold whitespace-nowrap">
+                        {formatPrice(getOrderItemTotal(item))}
+                      </p>
+                    </div>)
+                      ;
+                  }
+                  )}
+                </div>
+              </div>
+              {/* INFO */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl bg-neutral-50 p-4">
                   <p className="text-xs text-neutral-400">Giao hàng</p>
