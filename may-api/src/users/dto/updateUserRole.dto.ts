@@ -3,5 +3,5 @@ import { UserRole } from '@prisma/client';
 
 export class UpdateUserRoleDto {
   @IsEnum(UserRole)
-  role: UserRole;
+  role!: UserRole;
 }

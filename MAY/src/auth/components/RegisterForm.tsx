@@ -44,7 +44,7 @@ export const RegisterForm = ({
   const strengthColor = {
     0: 'bg-neutral-300',
     1: 'bg-red-400',
-    2: 'bg-orange-400',
+    2: 'bg-[#6c935b]',
     3: 'bg-yellow-400',
     4: 'bg-green-400',
   };
@@ -258,7 +258,7 @@ export const RegisterForm = ({
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full rounded-lg bg-orange-400 py-3 text-sm font-bold text-white transition hover:bg-orange-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-lg bg-[#6c935b] py-3 text-sm font-bold text-white transition hover:bg-orange-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
       </button>

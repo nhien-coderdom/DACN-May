@@ -5,14 +5,14 @@ import { UserRole } from '@prisma/client';
 export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(6)
   @Matches(/^(?=.*[A-Z])(?=.*\d).+$/, {
     message: "Mat khau phai chua it nhat 1 chu cai in hoa va 1 chu so",
   })
-  password: string;
+  password!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -20,7 +20,7 @@ export class CreateUserDto {
   @Matches(/^0\d{9}$/, {
     message: 'Phone must start with 0 and have exactly 10 digits (e.g., 0912345678)',
   })
-  phone: string;
+  phone!: string;
 
   @IsOptional()
   @IsString()

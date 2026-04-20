@@ -10,10 +10,8 @@ interface ProductFormProps {
 }
 
 export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps) => {
-  //  FETCH CATEGORIES
   const { data: categories, isLoading: isCategoriesLoading } = useProductCategories()
 
-  //  STATE LƯU FORM DATA
   const [formData, setFormData] = useState<CreateProductDTO>({
     name: '',
     price: 0,
@@ -22,10 +20,12 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
     imageUrl: '',
   })
 
-  // EFFECT: KHI initialData THAY ĐỔI → CẬP NHẬT FORM
+  const handleUpload = useCallback((url: string) => {
+    setFormData(prev => ({ ...prev, imageUrl: url }))
+  }, [])
+
   useEffect(() => {
-    if (initialData) // Nếu có initialData (edit mode), set formData theo initialData
-      {
+    if (initialData) {
       setFormData({
         name: initialData.name,
         price: initialData.price,
@@ -34,8 +34,6 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
         imageUrl: initialData.imageUrl || '',
       })
     } else {
-      // Nếu categories được load và có dữ liệu, set categoryId thành category đầu tiên
-      // Nếu không, đợi categories load xong
       setFormData({
         name: '',
         price: 0,
@@ -46,7 +44,6 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
     }
   }, [initialData])
 
-  //  UPDATE categoryId khi categories được load (chỉ khi tạo mới)
   useEffect(() => {
     if (!initialData && categories && categories.length > 0 && formData.categoryId === 0) {
       setFormData(prev => ({
@@ -56,10 +53,9 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
     }
   }, [categories, initialData])
 
-  //  XỬ LÝ THAY ĐỔI INPUT
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    
+
     if (name === 'categoryId' || name === 'price') {
       const numValue = value ? parseFloat(value) : 0
       setFormData(prev => ({
@@ -74,12 +70,6 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
     }
   }
 
-  //  MEMOIZED UPLOAD HANDLER - Prevents re-renders of CloudinaryUpload
-  const handleUpload = useCallback((url: string) => {
-    setFormData(prev => ({ ...prev, imageUrl: url }))
-  }, [])
-
-  //  XỬ LÝ SUBMIT FORM
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit(formData)
@@ -87,12 +77,10 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* =================== TIÊU ĐỀ =================== */}
       <h2 className="text-xl font-bold mb-4">
         {initialData ? 'Edit Product' : 'Add Product'}
       </h2>
 
-      {/* =================== FIELD: NAME =================== */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">
           Name <span className="text-red-500">*</span>
@@ -103,12 +91,10 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
           value={formData.name}
           onChange={handleChange}
           required
-          className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="ex: Iced Coffee"
+          className="w-full px-3 py-2 border rounded"
         />
       </div>
 
-      {/* =================== FIELD: PRICE =================== */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">
           Price <span className="text-red-500">*</span>
@@ -121,86 +107,63 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
           required
           step="0.01"
           min="0"
-          className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="0.00"
+          className="w-full px-3 py-2 border rounded"
         />
       </div>
 
-      {/* =================== FIELD: CATEGORY ID =================== */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">
           Category <span className="text-red-500">*</span>
         </label>
-        
+
         {isCategoriesLoading ? (
-          <div className="w-full px-3 py-2 border rounded bg-gray-100 text-gray-500">
-            Loading categories...
-          </div>
-        ) : !categories || categories.length === 0 ? (
-          <div className="w-full px-3 py-2 border rounded bg-red-50 text-red-500">
-            No categories available
-          </div>
+          <div className="px-3 py-2 border rounded bg-gray-100">Loading...</div>
         ) : (
           <select
             name="categoryId"
             value={formData.categoryId}
             onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            className="w-full px-3 py-2 border rounded"
           >
-            <option value="">-- Select Category --</option>
-            {categories.map((cat) => (
+            {categories?.map((cat) => (
               <option key={cat.id} value={cat.id}>
-                {cat.id} - {cat.name}
+                {cat.name}
               </option>
             ))}
           </select>
         )}
       </div>
 
-      {/* =================== FIELD: DESCRIPTION =================== */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Description</label>
+        <label>Description</label>
         <textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Product description..."
-          rows={3}
+          className="w-full px-3 py-2 border rounded"
         />
       </div>
 
-      {/* =================== FIELD: IMAGE URL =================== */}
+      {/* ✅ Upload */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Image URL</label>
-        <CloudinaryUpload 
-          onUpload={handleUpload}
-      />
+        <CloudinaryUpload onUpload={handleUpload} />
 
-      {formData.imageUrl && (
-        <div>
-          <img 
+        {formData.imageUrl && (
+          <img
             src={formData.imageUrl}
             className="mt-4 h-40 w-full object-cover rounded border"
           />
-        </div>
-      )}
+        )}
       </div>
 
-      {/* =================== BUTTONS =================== */}
       <div className="flex gap-3 justify-end">
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition"
-        >
+        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
           Cancel
         </button>
         <button
           type="submit"
-          disabled={isCategoriesLoading || !formData.categoryId || formData.categoryId === 0}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!formData.categoryId}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
         >
           {initialData ? 'Update' : 'Create'}
         </button>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -11,7 +11,9 @@ function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const from = (location.state as { from?: string } | null)?.from || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ function Login() {
 
     try {
       await login(email, password);
-      navigate("/");
+      navigate(from, { replace: true });
       console.log("Login successful with email:", email);
     } catch (err: any) {
       console.error("Login failed:", err);
@@ -105,7 +107,7 @@ function Login() {
               </label>
               <a
                 href="#"
-                className="text-orange-400 hover:text-orange-500 transition font-medium"
+                className="text-orange-400 hover:text-[#086136] transition font-medium"
               >
                 Quên mật khẩu?
               </a>
@@ -115,7 +117,7 @@ function Login() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full rounded-lg bg-orange-400 py-3 text-sm font-bold text-white transition hover:bg-orange-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-lg bg-[#6c935b] py-3 text-sm font-bold text-white transition hover:bg-orange-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
@@ -126,7 +128,7 @@ function Login() {
             Chưa có tài khoản?{" "}
             <Link
               to="/register"
-              className="font-semibold text-orange-400 hover:text-orange-500 transition"
+              className="font-semibold text-orange-400 hover:text-[#086136] transition"
             >
               Đăng ký ngay
             </Link>

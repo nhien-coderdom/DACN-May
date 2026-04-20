@@ -1,18 +1,35 @@
 import React, { createContext, useContext, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../lib/api";
 
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
   | "PREPARING"
   | "SHIPPING"
+  | "COMPLETED"
   | "DELIVERED"
   | "CANCELLED";
+
+export type PaymentMethod = "CASH" | "VNPAY" | "STRIPE" | "BANK_TRANSFER" | "MOMO";
+
+export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED";
 
 export type OrderLog = {
   id: number;
   status: OrderStatus;
   note?: string | null;
+  createdAt: string;
+};
+
+export type Payment = {
+  id: number;
+  orderId: number;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  amount: number;
+  transactionId?: string | null;
+  paidAt?: string | null;
   createdAt: string;
 };
 
@@ -35,7 +52,7 @@ export type OrderItem = {
   product?: {
     id: number;
     name: string;
-    image?: string | null;
+    imageUrl?: string | null;
   };
 };
 
@@ -54,6 +71,7 @@ export type Order = {
   isDeleted: boolean;
   items: OrderItem[];
   logs: OrderLog[];
+  payments?: Payment[];
 
   // nếu BE include user
   user?: {
@@ -69,13 +87,11 @@ type CreateOrderPayload = {
   phone: string;
   address: string;
   usedPoint?: number;
+  paymentMethod?: "CASH" | "VNPAY";
   items: {
     productId: number;
     quantity: number;
-    toppings?: {
-      toppingName: string;
-      toppingPrice: number;
-    }[];
+    toppings?: number[];
   }[];
 };
 
@@ -94,11 +110,12 @@ type OrdersContextType = {
   updateOrderInfo: (id: number, payload: UpdateOrderInfoPayload) => Promise<void>;
   cancelOrder: (id: number) => Promise<void>;
   deleteOrder: (id: number) => Promise<void>;
+  retryPayment: (orderId: number, method?: "CASH" | "VNPAY") => Promise<{ success: boolean; paymentUrl?: string; nextAction?: string }>;
 };
 
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
-const API_URL = "http://localhost:3000/orders";
+const API_URL = `${API_BASE_URL}/orders`;
 
 export function OrdersProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -212,6 +229,26 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const retryPayment = async (orderId: number, method?: "CASH" | "VNPAY") => {
+    try {
+      const payload: { method?: "CASH" | "VNPAY" } = {};
+      if (method) {
+        payload.method = method;
+      }
+
+      const res = await axios.post(
+        `${API_BASE_URL}/payments/retry/${orderId}`,
+        payload,
+        { withCredentials: true }
+      );
+
+      return res.data;
+    } catch (error) {
+      console.error("Retry payment failed:", error);
+      throw error;
+    }
+  };
+
   return (
     <OrdersContext.Provider
       value={{
@@ -224,6 +261,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
         updateOrderInfo,
         cancelOrder,
         deleteOrder,
+        retryPayment,
       }}
     >
       {children}

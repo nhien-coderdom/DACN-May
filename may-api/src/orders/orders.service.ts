@@ -3,59 +3,57 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
+import { OrderStatus, PaymentMethod } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateOrderDto } from './dto/create-orders.dto.js';
 import { OrdersGateway } from './orders.gateway.js';
-import { OrderStatus } from '@prisma/client';
+import { calculateEarnedPoints } from '../utils/loyalty.util.js';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly ordersGateway: OrdersGateway
-  ) { }
+    private readonly ordersGateway: OrdersGateway,
+  ) {}
+
+  private readonly orderInclude = {
+    user: true,
+    items: {
+      include: {
+        toppings: true,
+        product: true,
+      },
+    },
+    payments: true,
+    logs: true,
+  } as const;
+
+  private readonly validPaymentMethods: PaymentMethod[] = [
+    'CASH',
+    'BANK_TRANSFER',
+    'MOMO',
+    'VNPAY',
+    'STRIPE',
+  ];
 
   async findAll() {
     return this.prisma.order.findMany({
-      where: {
-        isDeleted: false,
-      },
-      include: {
-        user: true,
-        items: {
-          include: {
-            toppings: true,
-            product: true,
-          },
-        },
-        payments: true,
-        logs: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      where: { isDeleted: false },
+      include: this.orderInclude,
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async findOne(id: number) {
-    //findUnique: Tìm 1 order duy nhất theo id
     const order = await this.prisma.order.findFirst({
       where: { id, isDeleted: false },
-      include: {
-        user: true,
-        items: {
-          include: {
-            toppings: true,
-            product: true,
-          },
-        },
-        payments: true,
-        logs: true,
-      },
+      include: this.orderInclude,
     });
+
     if (!order) {
       throw new NotFoundException('Order not found');
     }
+
     return order;
   }
 
@@ -73,6 +71,7 @@ export class OrdersService {
           isDeleted: true,
           deletedAt: new Date(),
         },
+        include: this.orderInclude,
       });
 
       await prisma.orderLog.create({
@@ -89,20 +88,36 @@ export class OrdersService {
   }
 
   async create(data: CreateOrderDto) {
-    // items (orderitems) BỰ -> có proudct -> toppoing
-    const { userId, phone, address, items, usedPoint: inputUsedPoint } = data;
-    const usedPoint = inputUsedPoint || 0;
+    const {
+      userId,
+      phone,
+      address,
+      items,
+      usedPoint: inputUsedPoint,
+      paymentMethod,
+    } = data;
+
+    const usedPoint = inputUsedPoint ?? 0;
+    const paymentMethodToUse = (paymentMethod ?? 'CASH') as PaymentMethod;
 
     if (!items || items.length === 0) {
       throw new BadRequestException('Order must contain at least one item');
     }
 
-    return this.prisma.$transaction(async (prisma) => {
-      //  1. Check user
+    if (!this.validPaymentMethods.includes(paymentMethodToUse)) {
+      throw new BadRequestException(
+        `Invalid payment method: ${paymentMethodToUse}`,
+      );
+    }
+
+    const createdOrder = await this.prisma.$transaction(async (prisma) => {
       const user = await prisma.user.findUnique({
         where: { id: userId },
       });
-      if (!user) throw new BadRequestException('User not found');
+
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
 
       if (usedPoint < 0) {
         throw new BadRequestException('usedPoint cannot be negative');
@@ -112,30 +127,25 @@ export class OrdersService {
         throw new BadRequestException('Not enough loyalty points');
       }
 
-      // 2. Lấy tất cả product + topping 1 lần
-      // Validate: check for duplicate productIds to avoid logic errors
-      const productIds = items.map((i) => i.productId);
-      const uniqueProductIds = [...new Set(productIds)];
-      if (uniqueProductIds.length < productIds.length) {
-        // Warning: duplicate products detected but allowed (will still be created)
-      }
+      const productIds = [...new Set(items.map((item) => item.productId))];
+      const toppingIds = [
+        ...new Set(items.flatMap((item) => item.toppings || [])),
+      ];
 
-      const products = await prisma.product.findMany({
-        where: { id: { in: uniqueProductIds } },
-      });
+      const [products, toppings] = await Promise.all([
+        prisma.product.findMany({
+          where: { id: { in: productIds } },
+        }),
+        prisma.topping.findMany({
+          where: { id: { in: toppingIds } },
+        }),
+      ]);
 
-      // Batch query toppings (UNIQUE to avoid redundant queries)
-      const toppingIds = [...new Set(items.flatMap((i) => i.toppings || []))];
+      const productMap = new Map(products.map((product) => [product.id, product]));
+      const toppingMap = new Map(toppings.map((topping) => [topping.id, topping]));
 
-      const toppings = await prisma.topping.findMany({
-        where: { id: { in: toppingIds } },
-      });
+      let subtotal = 0;
 
-      // dùng Map 
-      const productMap = new Map(products.map((p) => [p.id, p]));
-      const toppingMap = new Map(toppings.map((t) => [t.id, t]));
-
-      // 🔹 3. Tạo order trước
       const order = await prisma.order.create({
         data: {
           userId,
@@ -144,12 +154,11 @@ export class OrdersService {
           status: 'PENDING',
           total: 0,
           usedPoint,
+          earnedPoint: 0,
+          isDeleted: false,
         },
       });
 
-      let total = 0;
-
-      //  Xử lý items
       for (const item of items) {
         if (item.quantity <= 0) {
           throw new BadRequestException('Quantity must be greater than 0');
@@ -157,9 +166,7 @@ export class OrdersService {
 
         const product = productMap.get(item.productId);
         if (!product) {
-          throw new BadRequestException(
-            `Product ${item.productId} not found`,
-          );
+          throw new BadRequestException(`Product ${item.productId} not found`);
         }
 
         const orderItem = await prisma.orderItem.create({
@@ -172,16 +179,14 @@ export class OrdersService {
           },
         });
 
-        let itemTotal = product.price * item.quantity;
+        let itemSubtotal = product.price * item.quantity;
 
-        // toppings
         if (item.toppings && item.toppings.length > 0) {
           for (const toppingId of item.toppings) {
             const topping = toppingMap.get(toppingId);
+
             if (!topping) {
-              throw new BadRequestException(
-                `Topping ${toppingId} not found`,
-              );
+              throw new BadRequestException(`Topping ${toppingId} not found`);
             }
 
             await prisma.orderItemTopping.create({
@@ -192,53 +197,20 @@ export class OrdersService {
               },
             });
 
-            itemTotal += topping.price * item.quantity;
+            itemSubtotal += topping.price * item.quantity;
           }
         }
 
-        total += itemTotal;
+        subtotal += itemSubtotal;
       }
 
-      // Apply usedPoint
-      if (usedPoint > total) {
+      if (usedPoint > subtotal) {
         throw new BadRequestException('usedPoint exceeds order total');
       }
 
-      total = total - usedPoint;
+      const total = subtotal - usedPoint;
+      const earnedPoint = calculateEarnedPoints(total);
 
-      // 🔹 6. Tính earnedPoint (ví dụ 10%)
-      const earnedPoint = Math.floor(total * 0.1);
-
-      // 🔹 7. Update order
-      const updatedOrder = await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          total,
-          earnedPoint,
-        },
-        include: {
-          user: true,
-          items: {
-            include: {
-              toppings: true,
-              product: true,
-            },
-          },
-          payments: true,
-          logs: true,
-        },
-      });
-
-      //   Log
-      await prisma.orderLog.create({
-        data: {
-          orderId: updatedOrder.id,
-          status: 'PENDING',
-          note: 'Order created',
-        },
-      });
-
-      // Deduct loyalty points if usedPoint > 0
       if (usedPoint > 0) {
         await prisma.user.update({
           where: { id: userId },
@@ -248,16 +220,43 @@ export class OrdersService {
         });
       }
 
-      this.ordersGateway.emitNewOrder(updatedOrder);
-      return updatedOrder;
+      await prisma.payment.create({
+        data: {
+          orderId: order.id,
+          method: paymentMethodToUse,
+          status: 'PENDING',
+          amount: total,
+        },
+      });
+
+      await prisma.orderLog.create({
+        data: {
+          orderId: order.id,
+          status: 'PENDING',
+          note: 'Order created',
+        },
+      });
+
+      return prisma.order.update({
+        where: { id: order.id },
+        data: {
+          total,
+          earnedPoint,
+        },
+        include: this.orderInclude,
+      });
+
     });
+
+    this.ordersGateway.emitNewOrder(createdOrder);
+    return createdOrder;
   }
+
   async updateStatus(id: number, status: OrderStatus, userId?: number) {
     const order = await this.findOne(id);
 
-    // CRITICAL: Prevent double processing on COMPLETED
-    if (order.status === 'COMPLETED' && status === 'COMPLETED') {
-      throw new BadRequestException('Order already completed');
+    if (order.status === status) {
+      throw new BadRequestException(`Order is already ${status}`);
     }
 
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
@@ -274,22 +273,27 @@ export class OrdersService {
       );
     }
 
-    return this.prisma.$transaction(async (prisma) => {
-      const updated = await prisma.order.update({
+    // Staff confirmation validation
+    if (status === 'CONFIRMED' && order.status === 'PENDING') {
+      const latestVnpayPayment = [...(order.payments ?? [])]
+        .filter((payment) => payment.method === 'VNPAY')
+        .sort((a, b) => b.id - a.id)[0];
+
+      // For VNPAY, staff can only confirm after successful payment.
+      if (latestVnpayPayment && latestVnpayPayment.status !== 'SUCCESS') {
+        throw new BadRequestException(
+          `Cannot confirm order with VNPAY payment that is not successful. Current payment status: ${latestVnpayPayment.status}`
+        );
+      }
+      // For COD/CASH, staff can confirm directly when order is PENDING
+    }
+
+    const updated = await this.prisma.$transaction(async (prisma) => {
+      const updatedOrder = await prisma.order.update({
         where: { id },
         data: { status },
-        include: {
-          user: true,
-          items: {
-            include: {
-              toppings: true,
-              product: true,
-            },
-          },
-          payments: true,
-          logs: true,
-        },
-      })
+        include: this.orderInclude,
+      });
 
       await prisma.orderLog.create({
         data: {
@@ -309,9 +313,21 @@ export class OrdersService {
           },
         });
       }
-      this.ordersGateway.emitOrderUpdated(updated)
-      return updated;
+
+      if (status === 'CANCELLED' && order.usedPoint > 0) {
+        await prisma.user.update({
+          where: { id: order.userId },
+          data: {
+            loyaltyPoint: { increment: order.usedPoint },
+          },
+        });
+      }
+
+      return updatedOrder;
     });
+
+    this.ordersGateway.emitOrderUpdated(updated);
+    return updated;
   }
 
   async updateInfo(
@@ -320,75 +336,89 @@ export class OrdersService {
   ) {
     const order = await this.findOne(id);
 
-    if (order.status === 'COMPLETED' || order.status === 'CANCELLED') {
-      throw new BadRequestException(
-        'Cannot update info of completed or cancelled orders',
-      );
+    if (order.status !== 'PENDING') {
+      throw new BadRequestException('Only pending orders can be updated');
     }
 
-    const updateData: any = {};
-    if (data.phone !== undefined) updateData.phone = data.phone;
-    if (data.address !== undefined) updateData.address = data.address;
+    const hasPhone = data.phone !== undefined;
+    const hasAddress = data.address !== undefined;
+    const hasUsedPoint = data.usedPoint !== undefined;
 
-    let newTotal = order.total;
-    if (data.usedPoint !== undefined) {
-      if (data.usedPoint < 0) {
-        throw new BadRequestException('usedPoint cannot be negative');
-      }
-
-      // lấy user để check điểm
-      const user = await this.prisma.user.findUnique({
-        where: { id: order.userId },
-      });
-      if (!user) {
-        throw new BadRequestException('User not found');
-      }
-
-      if (data.usedPoint > user.loyaltyPoint + order.usedPoint) {
-        throw new BadRequestException('Not enough loyalty points');
-      }
-
-      // recalculate total
-      newTotal = order.total + order.usedPoint - data.usedPoint;
-
-      // CRITICAL: Check total not negative
-      if (newTotal < 0) {
-        throw new BadRequestException('usedPoint exceeds order total');
-      }
-
-      updateData.usedPoint = data.usedPoint;
-      updateData.total = newTotal;
+    if (!hasPhone && !hasAddress && !hasUsedPoint) {
+      return order;
     }
 
-    return this.prisma.$transaction(async (prisma) => {
-      // Guard: only calculate pointDifference if usedPoint was actually provided
-      const pointDifference = data.usedPoint !== undefined ? data.usedPoint - order.usedPoint : 0;
+    const updatedOrder = await this.prisma.$transaction(async (prisma) => {
+      const updateData: Record<string, unknown> = {};
 
-      // Update user loyalty points if usedPoint changed
-      if (pointDifference !== 0) {
-        await prisma.user.update({
+      if (hasPhone) updateData.phone = data.phone;
+      if (hasAddress) updateData.address = data.address;
+
+      if (hasUsedPoint) {
+        const nextUsedPoint = data.usedPoint ?? 0;
+
+        if (nextUsedPoint < 0) {
+          throw new BadRequestException('usedPoint cannot be negative');
+        }
+
+        const user = await prisma.user.findUnique({
           where: { id: order.userId },
+        });
+
+        if (!user) {
+          throw new BadRequestException('User not found');
+        }
+
+        const availablePoints = user.loyaltyPoint + order.usedPoint;
+        if (nextUsedPoint > availablePoints) {
+          throw new BadRequestException('Not enough loyalty points');
+        }
+
+        const subtotal = order.total + order.usedPoint;
+        if (nextUsedPoint > subtotal) {
+          throw new BadRequestException('usedPoint exceeds order total');
+        }
+
+        const pointDifference = nextUsedPoint - order.usedPoint;
+        const newTotal = subtotal - nextUsedPoint;
+        const newEarnedPoint = calculateEarnedPoints(newTotal);
+
+        if (pointDifference !== 0) {
+          await prisma.user.update({
+            where: { id: order.userId },
+            data: {
+              loyaltyPoint: { decrement: pointDifference },
+            },
+          });
+        }
+
+        updateData.usedPoint = nextUsedPoint;
+        updateData.total = newTotal;
+        updateData.earnedPoint = newEarnedPoint;
+      }
+
+      const updated = await prisma.order.update({
+        where: { id },
+        data: updateData,
+        include: this.orderInclude,
+      });
+
+      if (hasUsedPoint) {
+        await prisma.payment.updateMany({
+          where: {
+            orderId: id,
+            status: 'PENDING',
+          },
           data: {
-            loyaltyPoint: { decrement: pointDifference },
+            amount: updated.total,
           },
         });
       }
 
-      return await prisma.order.update({
-        where: { id },
-        data: updateData,
-        include: {
-          user: true,
-          items: {
-            include: {
-              toppings: true,
-              product: true,
-            },
-          },
-          payments: true,
-          logs: true,
-        },
-      });
-    })
+      return updated;
+    });
+
+    this.ordersGateway.emitOrderUpdated(updatedOrder);
+    return updatedOrder;
   }
 }

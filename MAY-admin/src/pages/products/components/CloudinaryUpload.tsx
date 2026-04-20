@@ -4,14 +4,19 @@ interface CloudinaryUploadProps {
   onUpload: (url: string) => void;
 }
 
-export default function CloudinaryUpload({
-  onUpload,
-}: CloudinaryUploadProps) {
+export default function CloudinaryUpload({ onUpload }: CloudinaryUploadProps) {
   const widgetRef = useRef<any>(null);
+  const onUploadRef = useRef(onUpload);
 
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
+  // ✅ luôn giữ callback mới nhất
+  useEffect(() => {
+    onUploadRef.current = onUpload;
+  }, [onUpload]);
+
+  // ✅ chỉ tạo widget 1 lần
   useEffect(() => {
     if (!window.cloudinary) return;
 
@@ -36,27 +41,25 @@ export default function CloudinaryUpload({
           return;
         }
 
-        if (result && result.event === "success") {
-          onUpload?.(result.info.secure_url);
+        if (result?.event === "success") {
+          onUploadRef.current?.(result.info.secure_url);
         }
       }
     );
-    console.log('window.cloudinary:', window.cloudinary)
-    console.log('cloudName:', cloudName)
-    console.log('uploadPreset:', uploadPreset)
-  }, [cloudName, uploadPreset, onUpload]);
+
+    // ✅ cleanup tránh memory leak
+    return () => {
+      widgetRef.current = null;
+    };
+  }, [cloudName, uploadPreset]);
 
   return (
     <button
       type="button"
       onClick={() => widgetRef.current?.open()}
-      className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition"
+      className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500"
     >
-      <p className="text-sm font-medium text-gray-700">Click to upload image</p>
-      <p className="text-xs text-gray-500 mt-1">
-        Upload from Local or Image URL
-      </p>
+      Click to upload image
     </button>
-
   );
 }

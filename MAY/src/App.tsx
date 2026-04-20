@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import Register from "./auth/pages/Register";
 import MyOrders from "./pages/MyOrders";
 import Profile from "./profile/pages/Profile";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailed from "./pages/PaymentFailed";
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/checkout/success" element={<PaymentSuccess />} />
+        <Route path="/checkout/failed" element={<PaymentFailed />} />
       </Routes>
     </BrowserRouter>
   );

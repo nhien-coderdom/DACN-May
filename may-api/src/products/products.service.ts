@@ -59,27 +59,29 @@ export class ProductsService {
   }
 
   async findOne(id: number) {
-    const product = await this.prisma.product.findFirst({
-      where: {
-        id,
-        isDeleted: false,
-      },
-      include: {
-        category: true,
-        toppings: {
-          include: {
-            topping: true,
-          },
-        },
-      },
-    });
-
-    if (!product) {
-      throw new NotFoundException('Không tìm thấy product');
-    }
-
-    return product;
+  if (!id || isNaN(id)) {
+    throw new BadRequestException('Invalid product id');
   }
+
+  const product = await this.prisma.product.findFirst({
+    where: {
+      id,
+      isDeleted: false,
+    },
+    include: {
+      category: true,
+      toppings: {
+        include: { topping: true },
+      },
+    },
+  });
+
+  if (!product) {
+    throw new NotFoundException('Không tìm thấy product');
+  }
+
+  return product;
+}
 
   async update(id: number, data: UpdateProductDto) {
     await this.findOne(id);
@@ -129,4 +131,62 @@ export class ProductsService {
       },
     });
   }
+
+ async getBestSellingProducts(limit = 5) {
+  // 1. Lấy top productId theo số lượng bán
+  const result = await this.prisma.orderItem.groupBy({
+    by: ['productId'],
+    where: {
+      order: {
+        status: 'COMPLETED', // 🔥 chỉ tính đơn thành công
+      },
+    },
+    _sum: {
+      quantity: true,
+    },
+    orderBy: {
+      _sum: {
+        quantity: 'desc',
+      },
+    },
+    take: limit,
+  });
+
+  if (!result.length) return [];
+
+  // 2. Lấy danh sách productId
+  const productIds = result.map((item) => item.productId);
+
+  // 3. Query product (lọc isDeleted)
+  const products = await this.prisma.product.findMany({
+    where: {
+      id: { in: productIds },
+      isDeleted: false,
+    },
+    include: {
+      category: true,
+      toppings: {
+        include: {
+          topping: true,
+        },
+      },
+    },
+  });
+
+  // 4. Map lại + giữ đúng thứ tự best selling
+  return result
+    .map((item) => {
+      const product = products.find(
+        (p) => p.id === item.productId
+      );
+
+      if (!product) return null;
+
+      return {
+        ...product,
+        totalSold: item._sum.quantity ?? 0,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+}
 }

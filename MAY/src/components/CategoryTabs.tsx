@@ -25,7 +25,7 @@ function CategoryTabs() {
   if (loading && categories.length === 0) {
     return (
       <div className="mx-auto py-1 text-sm text-neutral-500 sm:py-2">
-        loading...
+        Loading...
       </div>
     );
   }
@@ -60,7 +60,7 @@ function CategoryTabs() {
 
             {/* nếu tab đang active thì hiện gạch chân màu cam */}
             {isActive && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400 rounded-full" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6c935b] rounded-full" />
             )}
           </button>
         );

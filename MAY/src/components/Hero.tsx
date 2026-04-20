@@ -1,16 +1,12 @@
 function Hero() {
   return (
-    <section className="text-center py-2 sm:py-3">
-      <h1 className="font-serif text-4xl sm:text-5xl font-black text-neutral-900">
-        Drink Zone
-      </h1>
-
-      <h2 className="mt-1 text-lg sm:text-2xl font-black text-orange-400">
-        Fresh & Crafted Beverages
+    <section className="text-center py-2 sm:py-3 mt-20">
+      <h2 className="mt-1 text-lg sm:text-2xl font-black text-neutral-700">
+        Best seller
       </h2>
 
       <p className="mt-1 text-xs sm:text-sm text-neutral-500">
-        Handmade drinks just for you
+        Our top 5 best-selling products
       </p>
     </section>
   );

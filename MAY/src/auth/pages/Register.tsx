@@ -144,7 +144,7 @@ function Register() {
             Đã có tài khoản?{' '}
             <Link
               to="/login"
-              className="font-semibold text-orange-400 hover:text-orange-500 transition"
+              className="font-semibold text-orange-400 hover:text-[#086136] transition"
             >
               Đăng nhập
             </Link>

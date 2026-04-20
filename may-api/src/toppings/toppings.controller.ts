@@ -10,7 +10,7 @@ export class ToppingsController {
     constructor(private toppingsService: ToppingsService) {}
 
     @Get()
-    finalAll (){
+    findAll (){
         return this.toppingsService.findAll();
     }
     // param lấy từ url

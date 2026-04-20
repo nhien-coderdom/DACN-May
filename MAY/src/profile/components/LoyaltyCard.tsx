@@ -1,4 +1,4 @@
-import { FiAward, FiTrendingUp, FiCheck } from "react-icons/fi";
+import { FiAward } from "react-icons/fi";
 import type { User } from "../../contexts/AuthContext";
 
 interface LoyaltyCardProps {
@@ -12,7 +12,7 @@ function LoyaltyCard({ user, formatPrice }: LoyaltyCardProps) {
       case 'PLATINUM': return 'text-purple-600';
       case 'GOLD': return 'text-yellow-600';
       case 'SILVER': return 'text-gray-400';
-      default: return 'text-orange-600';
+      default: return 'text-[#086136]';
     }
   };
 
@@ -37,14 +37,14 @@ function LoyaltyCard({ user, formatPrice }: LoyaltyCardProps) {
   return (
     <div className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-orange-50 to-orange-100 p-6 sm:p-8 shadow-sm">
       <h2 className="text-xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
-        <FiAward className="text-orange-500" size={24} />
-        Điểm tích lũy
+        <FiAward className="text-[#086136]" size={24} />
+        Hạng thành viên
       </h2>
 
       {/* Tier Badge */}
       <div className={`mb-6 rounded-xl border p-4 text-center ${getTierBg(user.loyaltyTier)}`}>
         <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wider">
-          Hạng thành viên
+          Xếp hạng theo tổng chi tiêu
         </p>
         <p className={`mt-2 text-2xl font-bold ${getTierColor(user.loyaltyTier)}`}>
           {getTierName(user.loyaltyTier)}
@@ -53,37 +53,34 @@ function LoyaltyCard({ user, formatPrice }: LoyaltyCardProps) {
 
       {/* Points Display */}
       <div className="mb-8 rounded-xl bg-white/80 border border-orange-200 p-6 text-center backdrop-blur">
-        <p className="text-xs font-semibold text-orange-600 uppercase tracking-wider">
+        <p className="text-xs font-semibold text-[#086136] uppercase tracking-wider">
           Điểm hiện tại
         </p>
-        <p className="mt-2 text-5xl font-black text-orange-500">
+        <p className="mt-2 text-5xl font-black text-[#086136]">
           {(user.loyaltyPoint || 0).toLocaleString()}
-        </p>
-        <p className="mt-1 text-sm text-neutral-600">
-          pts
         </p>
       </div>
 
       {/* Points Info */}
       <div className="space-y-4 rounded-lg bg-white/60 p-4 backdrop-blur">
         <div className="border-t border-neutral-200 my-3 pt-3">
-          <p className="text-xs font-semibold text-neutral-900 mb-3">Yêu cầu hạng thành viên</p>
+          <p className="text-xs font-semibold text-neutral-900 mb-3">Yêu cầu hạng theo tổng tiền đã mua</p>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
-              <span>Thường: 0 - 99</span>
-              <span className={user.loyaltyPoint! >= 0 ? 'text-orange-600 font-bold' : 'text-neutral-400'}>✓</span>
+              <span>Thường: 0đ - 99.999đ</span>
+              <span className={user.totalSpent! >= 0 ? 'text-[#086136] font-bold' : 'text-neutral-400'}>✓</span>
             </div>
             <div className="flex justify-between">
-              <span>Bạc: 100 - 999</span>
-              <span className={user.loyaltyPoint! >= 100 ? 'text-orange-600 font-bold' : 'text-neutral-400'}>✓</span>
+              <span>Bạc: 100.000đ - 1.999.999đ</span>
+              <span className={user.totalSpent! >= 100000 ? 'text-[#086136] font-bold' : 'text-neutral-400'}>✓</span>
             </div>
             <div className="flex justify-between">
-              <span>Vàng: 1.000 - 1.499</span>
-              <span className={user.loyaltyPoint! >= 1000 ? 'text-orange-600 font-bold' : 'text-neutral-400'}>✓</span>
+              <span>Vàng: 2.000.000đ - 3.499.999đ</span>
+              <span className={user.totalSpent! >= 2000000 ? 'text-[#086136] font-bold' : 'text-neutral-400'}>✓</span>
             </div>
             <div className="flex justify-between">
-              <span>Bạch Kim: 1.500+</span>
-              <span className={user.loyaltyPoint! >= 1500 ? 'text-orange-600 font-bold' : 'text-neutral-400'}>✓</span>
+              <span>Bạch Kim: 3.500.000đ+</span>
+              <span className={user.totalSpent! >= 3500000 ? 'text-[#086136] font-bold' : 'text-neutral-400'}>✓</span>
             </div>
           </div>
         </div>

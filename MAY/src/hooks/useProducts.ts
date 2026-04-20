@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { productService } from '../services/productService';
+import { toppingService } from '../services/toppingService';
 import type { Product } from '../services/productService';
+import type { Topping } from '../services/toppingService';
 
 export interface UseProductsReturn {
   products: Product[];
@@ -123,4 +125,41 @@ export const useProductsByCategory = (categoryId: number | undefined): UseProduc
   }, [categoryId]);
 
   return { products, loading, error, refetch: fetchByCategory };
+};
+
+export interface UseAllToppingsReturn {
+  toppings: Topping[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+/**
+ * Hook to fetch all toppings
+ */
+export const useAllToppings = (): UseAllToppingsReturn => {
+  const [toppings, setToppings] = useState<Topping[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchToppings = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await toppingService.getAll();
+      setToppings(data);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(errorMessage);
+      console.error('Error fetching toppings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchToppings();
+  }, []);
+
+  return { toppings, loading, error, refetch: fetchToppings };
 };

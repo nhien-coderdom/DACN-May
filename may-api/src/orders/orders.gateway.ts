@@ -28,7 +28,7 @@ export class OrdersGateway
 
   handleConnection(client: Socket) {
     client.emit('connection', 'Connected to WebSocket server');
-    
+
     // Send heartbeat every 30 seconds
     const heartbeat = setInterval(() => {
       if (client.connected) {
@@ -39,8 +39,7 @@ export class OrdersGateway
     }, 30000);
   }
 
-  handleDisconnect(client: Socket) {
-  }
+  handleDisconnect(client: Socket) {}
 
   @SubscribeMessage('ping')
   handlePing(client: Socket): string {

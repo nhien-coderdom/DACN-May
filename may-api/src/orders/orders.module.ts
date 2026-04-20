@@ -8,5 +8,6 @@ import { OrdersGateway } from './orders.gateway.js';
   imports: [PrismaModule],
   controllers: [OrdersController],
   providers: [OrdersService, OrdersGateway],
+  exports: [OrdersService, OrdersGateway],
 })
 export class OrdersModule {}

@@ -4,5 +4,5 @@ export class UpdateLoyaltyDto {
 
   @IsNumber()
   @Min(0)
-  orderAmount: number;
+  orderAmount!: number;
 }
