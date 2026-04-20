@@ -12,8 +12,7 @@ function Cart() {
     new Intl.NumberFormat("vi-VN").format(value) + "đ";
 
   const subtotal = getTotalPrice();
-  const shipping = cart.length > 0 ? 30000 : 0;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 mt-20">
@@ -129,11 +128,6 @@ function Cart() {
                 <span>Tạm tính</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
-
-              <div className="flex items-center justify-between text-neutral-600">
-                <span>Phí vận chuyển</span>
-                <span>{formatPrice(shipping)}</span>
-              </div>
             </div>
 
             <div className="mt-5 flex items-center justify-between">
@@ -146,7 +140,7 @@ function Cart() {
             </div>
 
             <p className="mt-3 text-sm leading-6 text-neutral-500">
-              Tổng thanh toán đã bao gồm lựa chọn topping và phí vận chuyển.
+              Tổng thanh toán đã bao gồm lựa chọn topping.
             </p>
 
             <button

@@ -11,9 +11,22 @@ import { AuthModule } from './auth/auth.module.js';
 import { RevenuesModule } from './revenues/revenues.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
 import { PersonalizationModule } from './personalized/personalization.module.js';
+import { PaymentsModule } from './payments/payments.module.js';
 
 @Module({
-  imports: [PrismaModule, ProductsModule, UsersModule, CategoriesModule, ToppingsModule, OrdersModule, AuthModule, RevenuesModule, DashboardModule  , PersonalizationModule],
+  imports: [
+    PrismaModule,
+    ProductsModule,
+    UsersModule,
+    CategoriesModule,
+    ToppingsModule,
+    OrdersModule,
+    AuthModule,
+    RevenuesModule,
+    DashboardModule,
+    PersonalizationModule,
+    PaymentsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

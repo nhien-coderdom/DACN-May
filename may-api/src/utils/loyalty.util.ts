@@ -1,7 +1,9 @@
-export function calculateLoyaltyTier(loyaltyPoint: number): 'NORMAL' | 'SILVER' | 'GOLD' | 'PLATINUM' {
-  if (loyaltyPoint >= 1500) return 'PLATINUM';
-  if (loyaltyPoint >= 1000) return 'GOLD';
-  if (loyaltyPoint >= 100) return 'SILVER';
+export function calculateLoyaltyTier(
+  totalSpent: number,
+): 'NORMAL' | 'SILVER' | 'GOLD' | 'PLATINUM' {
+  if (totalSpent >= 3500000) return 'PLATINUM';
+  if (totalSpent >= 2000000) return 'GOLD';
+  if (totalSpent >= 100000) return 'SILVER';
   return 'NORMAL';
 }
 
