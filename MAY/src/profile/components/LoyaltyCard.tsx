@@ -65,14 +65,14 @@ function LoyaltyCard({ user, formatPrice }: LoyaltyCardProps) {
           )}
 
           {/* ===== PROGRESS BAR ===== */}
-          <div className="relative h-4 w-full bg-gray-200 rounded-full overflow-hidden mb-4">
+          <div className="relative h-4 w-full bg-[#E5E7EB] rounded-full overflow-hidden mb-4">
             <div
-              className="h-full bg-gradient-to-r from-orange-400 to-red-500 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-[#FB923C] via-[#F97316] to-[#EA580C] transition-all duration-500"
               style={{ width: `${Math.min(progress, 100)}%` }}
             />
 
             {/* TEXT Ở GIỮA */}
-            <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white drop-shadow">
+            <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#6b8f5e] drop-shadow">
               {formatPrice(spent)} /{" "}
               {nextTier ? formatPrice(nextTier.min) : "MAX"}
             </div>

@@ -34,11 +34,11 @@ export const ProductsList = () => {
   }, [data, searchTerm])
 
   // 4️⃣ XỬ LÝ LOADING STATE
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <p>Đang tải...</p>
 
   // 5️⃣ HÀM DELETE
   const handleDelete = (id: number) => {
-    if (confirm('Delete this product?')) {
+    if (confirm('Xóa sản phẩm này?')) {
       deleteProduct(id)
     }
   }
@@ -69,12 +69,12 @@ export const ProductsList = () => {
     <div className="p-6">
       {/* =================== HEADER =================== */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Products</h1>
+        <h1 className="text-2xl font-bold">Sản phẩm</h1>
         <button
           onClick={handleCreate}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          + Add Product
+          + Thêm sản phẩm
         </button>
       </div>
 
@@ -82,14 +82,14 @@ export const ProductsList = () => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search by name or description..."
+          placeholder="Tìm kiếm theo tên hoặc mô tả..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {searchTerm && (
           <p className="text-sm text-gray-600 mt-2">
-            Found {filteredData.length} result{filteredData.length !== 1 ? 's' : ''} for "{searchTerm}"
+            Tìm thấy {filteredData.length} kết quả cho "{searchTerm}"
           </p>
         )}
       </div>
@@ -100,19 +100,19 @@ export const ProductsList = () => {
           <thead>
             <tr className="bg-gray-100 border-b">
               <th className="px-6 py-3 text-left text-sm font-semibold">#</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Price</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Category</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Description</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Image</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold">Actions</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Tên</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Giá</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Danh mục</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Mô tả</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Hình ảnh</th>
+              <th className="px-6 py-3 text-center text-sm font-semibold">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                  {searchTerm ? `No products found matching "${searchTerm}"` : 'No products yet'}
+                  {searchTerm ? `Không tìm thấy sản phẩm nào phù hợp với "${searchTerm}"` : 'Chưa có sản phẩm nào'}
                 </td>
               </tr>
             ) : (
@@ -133,7 +133,7 @@ export const ProductsList = () => {
                         className="h-10 w-10 object-cover rounded"
                       />
                     ) : (
-                      <span className="text-gray-400">No image</span>
+                      <span className="text-gray-400">Không có hình ảnh</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-sm flex gap-2 justify-center">
@@ -141,13 +141,13 @@ export const ProductsList = () => {
                       onClick={() => handleEdit(product)}
                       className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
                     >
-                      Edit
+                      Chỉnh sửa
                     </button>
                     <button
                       onClick={() => handleDelete(product.id)}
                       className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
                     >
-                      Delete
+                      Xóa
                     </button>
                   </td>
                 </tr>

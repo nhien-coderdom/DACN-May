@@ -65,19 +65,19 @@ const RevenuesPage: React.FC = () => {
 
     return [
       {
-        label: 'Completed',
+        label: 'Hoàn thành',
         value: orderStatsData.summary.completed,
         percentage: completedPercentage,
         color: colors[0],
       },
       {
-        label: 'Cancelled',
+        label: 'Đã hủy',
         value: orderStatsData.summary.cancelled,
         percentage: cancelledPercentage,
         color: colors[1],
       },
       {
-        label: 'Pending',
+        label: 'Chờ xử lý',
         value: orderStatsData.summary.pending,
         percentage: pendingPercentage,
         color: colors[2],
@@ -98,8 +98,8 @@ const RevenuesPage: React.FC = () => {
       {/* Header */}
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-gray-600 mt-2">Track your sales and order performance</p>
+          <h1 className="text-3xl font-bold text-gray-900">Thống kê doanh thu</h1>
+          <p className="text-gray-600 mt-2">Theo dõi doanh số bán hàng và hiệu suất đơn hàng</p>
         </div>
         {/* Tạo nút export Excel  */}
         {/* Sẽ call function exportRevenueToExcel hoặc exportOrderStatsToExcel */}
@@ -114,7 +114,7 @@ const RevenuesPage: React.FC = () => {
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
         >
-           Export Excel
+           Xuất Excel
         </button>
       </div>
 
@@ -124,13 +124,13 @@ const RevenuesPage: React.FC = () => {
           onClick={() => setActiveTab('revenue')}
           className={tabClasses('revenue')}
         >
-          STT Revenue
+          Doanh Thu
         </button>
         <button
           onClick={() => setActiveTab('orders')}
           className={tabClasses('orders')}
         >
-          STT Order Ratios
+          Tỷ Lệ Đơn Hàng
         </button>
       </div>
 

@@ -37,23 +37,23 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* STT Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Bảng Điều Khiển</h1>
         <p className="text-gray-500 mt-1">
-          Welcome back! Here's your business overview.
+          Chào mừng trở lại! Đây là tổng quan kinh doanh của bạn.
         </p>
       </div>
 
       {/* STT SECTION 1: QUICK STATS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Orders"
+          title="Tổng Đơn Hàng"
           value={stats?.totalOrders ?? '-'}
           icon={<ShoppingCart size={24} />}
           color="blue"
           loading={loading}
         />
         <StatCard
-          title="Total Revenue"
+          title="Tổng Doanh Thu"
           value={
             stats
               ? `${(stats.totalRevenue).toLocaleString('vi-VN')} ₫`
@@ -64,14 +64,14 @@ export default function Dashboard() {
           loading={loading}
         />
         <StatCard
-          title="Total Customers"
+          title="Tổng Khách Hàng"
           value={stats?.totalUsers ?? '-'}
           icon={<Users size={24} />}
           color="purple"
           loading={loading}
         />
         <StatCard
-          title="Total Products"
+          title="Tổng Sản Phẩm"
           value={stats?.totalProducts ?? '-'}
           icon={<Package size={24} />}
           color="orange"
@@ -82,9 +82,9 @@ export default function Dashboard() {
       {/* STT SECTION 2: CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SimpleChart
-          title="STT Revenue - Last 30 Days"
+          title="Doanh Thu - 30 Ngày Gần Đây"
           data={revenueData.map((item) => ({
-            label: new Date(item.date).toLocaleDateString('en-US', {
+            label: new Date(item.date).toLocaleDateString('vi-VN', {
               month: 'short',
               day: 'numeric',
             }),
@@ -93,7 +93,7 @@ export default function Dashboard() {
           height={300}
         />
         <SimpleChart
-          title="STT Orders - Last 30 Days"
+          title="Đơn Hàng - 30 Ngày Gần Đây"
           data={ordersData.map((item) => ({
             label: new Date(item.date).toLocaleDateString('en-US', {
               month: 'short',
@@ -108,11 +108,11 @@ export default function Dashboard() {
       {/* STT SECTION 3: TOP DATA */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DataTable
-          title="STT Top 10 Best-Selling Products"
+          title="Top 10 Sản Phẩm Bán Chạy Nhất"
           columns={[
-            { key: 'name', label: 'Product' },
-            { key: 'quantity', label: 'Quantity' },
-            { key: 'revenue', label: 'Revenue' },
+            { key: 'name', label: 'Sản Phẩm' },
+            { key: 'quantity', label: 'Số Lượng' },
+            { key: 'revenue', label: 'Doanh Thu' },
           ]}
           data={topProducts.map((p) => ({
             name: p.name,
@@ -122,11 +122,11 @@ export default function Dashboard() {
           loading={loading}
         />
         <DataTable
-          title="STT Top 10 Customers"
+          title="Top 10 Khách Hàng"
           columns={[
-            { key: 'name', label: 'Name' },
+            { key: 'name', label: 'Tên' },
             { key: 'email', label: 'Email' },
-            { key: 'totalSpent', label: 'Total Spent' },
+            { key: 'totalSpent', label: 'Tổng Chi Tiêu' },
           ]}
           data={topCustomers.map((c) => ({
             name: c.name,
@@ -140,12 +140,12 @@ export default function Dashboard() {
       {/* STT SECTION 4: RECENT DATA */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DataTable
-          title="STT Recent Orders"
+          title="Đơn Hàng Gần Đây"
           columns={[
             { key: 'id', label: 'ID' },
-            { key: 'user.name', label: 'Customer' },
-            { key: 'total', label: 'Total' },
-            { key: 'status', label: 'Status' },
+            { key: 'user.name', label: 'Khách Hàng' },
+            { key: 'total', label: 'Tổng Cộng' },
+            { key: 'status', label: 'Trạng Thái' },
           ]}
           data={recentOrders.map((o) => ({
             id: o.id,
@@ -157,12 +157,12 @@ export default function Dashboard() {
           loading={loading}
         />
         <DataTable
-          title="STT New Users"
+          title="Người Dùng Mới"
           columns={[
-            { key: 'name', label: 'Name' },
+            { key: 'name', label: 'Tên' },
             { key: 'email', label: 'Email' },
-            { key: 'phone', label: 'Phone' },
-            { key: 'createdAt', label: 'Registration Date' },
+            { key: 'phone', label: 'Số Điện Thoại' },
+            { key: 'createdAt', label: 'Ngày Đăng Ký' },
           ]}
           data={recentUsers.map((u) => ({
             name: u.name,

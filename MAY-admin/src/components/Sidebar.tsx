@@ -10,43 +10,43 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: 'Dashboard',
+    label: 'Bảng điều khiển',
     path: '/admin',
     icon: <LayoutDashboard size={20} />,
     status: 'active',
   },
   {
-    label: 'Categories',
+    label: 'Danh mục',
     path: '/admin/categories',
     icon: <Tag size={20} />,
     status: 'active',
   },
   {
-    label: 'Toppings',
+    label: 'Topping',
     path: '/admin/toppings',
     icon: <Coffee size={20} />,
     status: 'active',
   },
   {
-    label: 'Products',
+    label: 'Sản phẩm',
     path: '/admin/products',
     icon: <Package size={20} />,
     status: 'active',
   },
   {
-    label: 'Orders',
+    label: 'Đơn hàng',
     path: '/admin/orders',
     icon: <ShoppingCart size={20} />,
     status: 'active',
   },
   {
-    label: 'Revenue',
+    label: 'Doanh thu',
     path: '/admin/revenues',
     icon: <TrendingUp size={20} />,
     status: 'active',
   },
   {
-    label: 'Users',
+    label: 'Người dùng',
     path: '/admin/users',
     icon: <Users size={20} />,
     status: 'active',
@@ -77,7 +77,7 @@ export default function Sidebar() {
             >
               {item.icon}
               <span className="flex-1">{item.label}</span>
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded">Soon</span>
+              <span className="text-xs bg-gray-100 px-2 py-1 rounded">Sắp Tới</span>
             </div>
           ) : (
             <Link

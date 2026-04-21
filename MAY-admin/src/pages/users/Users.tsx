@@ -62,7 +62,7 @@ const Users: React.FC = () => {
   }
 
   const handleDelete = (userId: number) => {
-    if (confirm('Are you sure you want to delete this user?')) {
+    if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
       deleteUserMutation.mutate(userId)
     }
   }
@@ -75,7 +75,7 @@ const Users: React.FC = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Users Management</h1>
+        <h1 className="text-2xl font-bold">Quản Lý Người Dùng</h1>
         <button
           onClick={() => {
             setEditingUser(null)
@@ -83,7 +83,7 @@ const Users: React.FC = () => {
           }}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-medium"
         >
-          + Create User
+          + Tạo Người Dùng
         </button>
       </div>
 
@@ -91,14 +91,14 @@ const Users: React.FC = () => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search by email, name, or phone..."
+          placeholder="Tìm kiếm theo email, tên hoặc số điện thoại..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {searchTerm && (
           <p className="text-sm text-gray-600 mt-2">
-            Found {filteredUsers.length} result{filteredUsers.length !== 1 ? 's' : ''} for "{searchTerm}"
+            Tìm thấy {filteredUsers.length} kết quả cho "{searchTerm}"
           </p>
         )}
       </div>

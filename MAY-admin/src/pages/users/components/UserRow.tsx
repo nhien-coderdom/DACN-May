@@ -45,21 +45,21 @@ export const UserRow: React.FC<UserRowProps> = ({ user, onEdit, onDelete, onChan
           onClick={onEdit}
           className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
         >
-          Edit Info
+          Chỉnh sửa thông tin
         </button>
         <button
           onClick={onChangeRole}
           disabled={user.isDeleted || user.role === 'CUSTOMER'}
           className="bg-purple-500 text-white px-2 py-1 rounded text-xs hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Change Role
+          Thay đổi vai trò
         </button>
         <button
           onClick={onDelete}
           disabled={user.isDeleted}
           className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 disabled:opacity-50"
         >
-          {user.isDeleted ? 'Restore' : 'Delete'}
+          {user.isDeleted ? 'Khôi phục' : 'Xóa'}
         </button>
       </td>
     </tr>

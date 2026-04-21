@@ -29,15 +29,15 @@ export function OrderTable() {
   }, [orders, searchTerm])
 
   if (isLoading) {
-    return <div className="p-6 text-center">Loading orders...</div>
+    return <div className="p-6 text-center">Đang tải đơn hàng...</div>
   }
 
   if (error) {
-    return <div className="p-6 text-red-500">Error loading orders</div>
+    return <div className="p-6 text-red-500">Lỗi khi tải đơn hàng</div>
   }
 
   if (!orders || orders.length === 0) {
-    return <div className="p-6 text-center text-gray-500">No orders found</div>
+    return <div className="p-6 text-center text-gray-500">Không tìm thấy đơn hàng</div>
   }
 
   return (
@@ -46,14 +46,14 @@ export function OrderTable() {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search by order ID, customer name, phone, or status..."
+          placeholder="Tìm kiếm theo ID đơn hàng, tên khách hàng, số điện thoại hoặc trạng thái..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {searchTerm && (
           <p className="text-sm text-gray-600 mt-2">
-            Found {filteredOrders.length} result{filteredOrders.length !== 1 ? 's' : ''} for "{searchTerm}"
+            Tìm thấy {filteredOrders.length} kết quả cho "{searchTerm}"
           </p>
         )}
       </div>
@@ -63,20 +63,20 @@ export function OrderTable() {
           <table className="w-full">
             <thead className="bg-gray-100 border-b">
               <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Order ID</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Customer</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Phone</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Total</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Status</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Date</th>
-              <th className="px-4 py-3 text-center text-sm font-semibold">Actions</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Mã Đơn</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Khách Hàng</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Điện Thoại</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Tổng Cộng</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Trạng Thái</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Ngày</th>
+              <th className="px-4 py-3 text-center text-sm font-semibold">Hành Động</th>
             </tr>
             </thead>
             <tbody>
             {filteredOrders.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                  {searchTerm ? `No orders found matching "${searchTerm}"` : 'No orders yet'}
+                  {searchTerm ? `Không tìm thấy đơn hàng nào phù hợp với "${searchTerm}"` : 'Chưa có đơn hàng nào'}
                 </td>
               </tr>
             ) : (
@@ -116,7 +116,7 @@ export function OrderTable() {
                       setIsModalOpen(true)
                     }}
                   >
-                    View
+                    Xem chi tiết
                   </Button>
                 </td>
               </tr>

@@ -40,7 +40,7 @@ export const OrderStatsPie: React.FC<PieChartProps> = ({ data }) => {
 
   return (
     <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">Order Status Distribution</h3>
+      <h3 className="text-lg font-semibold mb-4">Phân phối trạng thái đơn hàng</h3>
       <div className="flex gap-8">
         {/* Pie Chart */}
         <div className="flex-shrink-0">
