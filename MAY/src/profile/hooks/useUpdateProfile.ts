@@ -9,9 +9,17 @@ export const useUpdateProfile = (token: string | null) => {
       if (!token) throw new Error('No token');
       return profileService.profileService.updateProfile(token, data)
     },
-    onSuccess: () => {
-      // Refresh profile data sau khi update
+    onSuccess: (updatedUser) => {
+      // Invalidate and refetch profile queries
       queryClient.invalidateQueries({ queryKey: ['profile'] })
+      
+      // Optionally set the updated user directly to cache
+      if (updatedUser) {
+        queryClient.setQueryData(['profile', token], updatedUser)
+      }
+    },
+    onError: (error) => {
+      console.error('Profile update failed:', error)
     },
   })
 }

@@ -245,7 +245,7 @@ export class AuthService {
         name: profile?.fullName || 'User',
         email: profile?.email || null,
         address: profile?.address || null,
-
+        password: '',
         role: 'CUSTOMER',
       },
     });
@@ -261,6 +261,7 @@ export class AuthService {
         email: user.email || profile?.email || null,
         name: user.name || profile?.fullName || 'User',
         address: user.address || profile?.address || null,
+        password : '', 
       },
     });
   }

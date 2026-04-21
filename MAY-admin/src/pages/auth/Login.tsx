@@ -41,7 +41,7 @@ export default function Login() {
       }
 
       // 2. Check if phone exists using our proxy backend
-      const { data } = await axios.get(`http://localhost:3000/auth/check-phone/${phone}`)
+      const { data } = await axios.get(`${api.defaults.baseURL}/auth/check-phone/${phone}`)
       if (!data.exists) {
         throw new Error("Số điện thoại chưa tồn tại trong hệ thống.")
       }

@@ -52,8 +52,16 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
-  updateProfile(@Body() dto: UpdateProfileDto, @Req() req: any) {
-    return this.authService.updateProfile(req.user.sub, dto);
+  async updateProfile(@Body() dto: UpdateProfileDto, @Req() req: any) {
+    console.log('📝 Update profile request:', { userId: req.user.sub, dto });
+    try {
+      const result = await this.authService.updateProfile(req.user.sub, dto);
+      console.log('✅ Profile updated successfully:', result);
+      return result;
+    } catch (error: any) {
+      console.error('❌ Profile update error:', error.message);
+      throw error;
+    }
   }
 
   @Post('logout')

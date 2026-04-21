@@ -5,6 +5,7 @@ import { auth } from "../../lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE_URL } from "../../lib/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ function Register() {
       }
 
       // 2. Check if phone exists
-      const { data } = await axios.get(`http://localhost:3000/auth/check-phone/${formData.phone}`);
+      const { data } = await axios.get(`${API_BASE_URL}/auth/check-phone/${formData.phone}`);
       if (data.exists) {
         throw new Error("SĐT ĐÃ_TỒN_TẠI");
       }
@@ -96,7 +97,7 @@ function Register() {
       const idToken = await result.user.getIdToken();
 
       // 2. Server Register/Login
-      const res = await axios.post("http://localhost:3000/auth/firebase-login", {
+      const res = await axios.post(`${API_BASE_URL}/auth/firebase-login`, {
         idToken,
         profile: {
           fullName: formData.fullName,
@@ -106,8 +107,19 @@ function Register() {
       });
 
       // 3. Complete authentication workflow
-      localStorage.setItem("access_token", res.data.access_token);
-      await fetchMe();
+      const accessToken = res.data.access_token;
+      
+      // Try to save token to localStorage
+      try {
+        localStorage.setItem("access_token", accessToken);
+        console.log("✅ Token saved to localStorage");
+      } catch (storageErr: any) {
+        console.warn("⚠️ localStorage blocked, using token from response:", storageErr.message);
+        // Token is still in memory, pass it to fetchMe
+      }
+
+      // fetchMe will get token from localStorage first, or use provided token
+      await fetchMe(accessToken);
 
       // Navigate home
       navigate("/");

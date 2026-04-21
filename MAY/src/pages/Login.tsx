@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { auth } from "../lib/firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import axios from "axios";
+import { API_BASE_URL } from "../lib/api";
 
 function Login() {
   const [phone, setPhone] = useState("");
@@ -44,7 +45,7 @@ function Login() {
       }
 
       // 2. Check if phone exists
-      const { data } = await axios.get(`http://localhost:3000/auth/check-phone/${phone}`);
+      const { data } = await axios.get(`${API_BASE_URL}/auth/check-phone/${phone}`);
       if (!data.exists) {
         throw new Error("SĐT CHƯA_TỒN_TẠI");
       }
@@ -80,18 +81,32 @@ function Login() {
       const idToken = await result.user.getIdToken();
 
       // 2. Server Login
-      const res = await axios.post("http://localhost:3000/auth/firebase-login", {
+      const res = await axios.post(`${API_BASE_URL}/auth/firebase-login`, {
         idToken,
       });
 
       // 3. Update Auth Context
-      localStorage.setItem("access_token", res.data.access_token);
-      await fetchMe();
+      const accessToken = res.data.access_token;
+      
+      // Try to save token to localStorage
+      try {
+        localStorage.setItem("access_token", accessToken);
+        console.log("✅ Token saved to localStorage");
+      } catch (storageErr: any) {
+        console.warn("⚠️ localStorage blocked, using token from response:", storageErr.message);
+        // Token is still in memory, pass it to fetchMe
+      }
+
+      // fetchMe will get token from localStorage first, or use provided token
+      await fetchMe(accessToken);
 
       // Navigate
       navigate(from, { replace: true });
-    } catch (err) {
-      setError("Mã OTP không chính xác hoặc đã hết hạn.");
+    } catch (err: any) {
+      console.error("❌ Login error:", err);
+      const serverMsg = err.response?.data?.message;
+      const firebaseMsg = err.message;
+      setError(serverMsg || firebaseMsg || "Mã OTP không chính xác hoặc đã hết hạn.");
     } finally {
       setLoading(false);
     }

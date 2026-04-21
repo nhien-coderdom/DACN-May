@@ -118,7 +118,7 @@ function ProductDetail() {
   if (error) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 py-12 text-center">
-        <h1 className="mb-2 text-2xl font-bold text-neutral-900">Cannot load product</h1>
+        <h1 className="mb-2 text-2xl font-bold text-neutral-900">Không thể tải sản phẩm</h1>
         <p className="mb-4 text-neutral-600">{error}</p>
         <button
           onClick={() => navigate("/")}
@@ -133,7 +133,7 @@ function ProductDetail() {
   if (!product) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 py-12 text-center">
-        <h1 className="mb-4 text-2xl font-bold text-neutral-900">Product not found</h1>
+        <h1 className="mb-4 text-2xl font-bold text-neutral-900">Sản phẩm không tồn tại</h1>
         <button
           onClick={() => navigate("/")}
           className="rounded-full bg-[#6c935b] px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
@@ -194,7 +194,7 @@ function ProductDetail() {
 
 
             <div className="mt-6">
-              <p className="mb-3 text-sm font-semibold text-neutral-900">Toppings (Optional)</p>
+              <p className="mb-3 text-sm font-semibold text-neutral-900">Toppings (Không bắt buộc)</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {availableToppings.map((topping) => {
                   const active = selectedToppings.includes(topping.id);

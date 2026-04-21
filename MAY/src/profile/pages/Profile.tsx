@@ -2,34 +2,33 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiLogOut, FiEdit2, FiCheck, FiX } from "react-icons/fi";
 import { useAuth } from "../../contexts/AuthContext";
-import { useProfile, useUpdateProfile } from "../hooks";
+import { useUpdateProfile } from "../hooks";
 import { LoyaltyCard } from "../components";
 
 function Profile() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, fetchMe } = useAuth();
   const token = localStorage.getItem("access_token");
   
-  const { data: profileData, isLoading } = useProfile(token);
-  const { mutate: updateProfile } = useUpdateProfile(token);
+  const { mutate: updateProfile, isPending } = useUpdateProfile(token);
   
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: profileData?.name || "",
-    phone: profileData?.phone || "",
-    address: profileData?.address || "",
+    name: user?.name || "",
+    phone: user?.phone || "",
+    address: user?.address || "",
   });
 
-  // Cập nhật form khi profileData load xong
+  // Cập nhật form khi user data thay đổi
   useEffect(() => {
-    if (profileData) {
+    if (user) {
       setFormData({
-        name: profileData.name,
-        phone: profileData.phone || "",
-        address: profileData.address || "",
+        name: user.name || "",
+        phone: user.phone || "",
+        address: user.address || "",
       });
     }
-  }, [profileData]);
+  }, [user]);
 
   if (!user) {
     return (
@@ -47,9 +46,10 @@ function Profile() {
     );
   }
 
-  const displayUser = profileData || user;
-
   const handleSave = () => {
+    console.log('💾 Attempting to save profile:', formData);
+    console.log('🔑 Token available:', !!token);
+    
     updateProfile(
       {
         name: formData.name,
@@ -57,11 +57,21 @@ function Profile() {
         address: formData.address,
       },
       {
-        onSuccess: () => {
-          setIsEditing(false);
+        onSuccess: (data) => {
+          console.log('✅ Profile update successful:', data);
+          // Refresh user data from server after update
+          fetchMe().then(() => {
+            console.log('✅ User data refreshed from server');
+            setIsEditing(false);
+          });
         },
-        onError: (error: unknown) => {
-          console.error('Update profile failed:', error);
+        onError: (error: any) => {
+          console.error('❌ Profile update failed:', {
+            error,
+            errorMessage: error.message,
+            responseData: error.response?.data,
+            responseStatus: error.response?.status,
+          });
           const axiosErr = error as {
             response?: {
               data?: {
@@ -69,7 +79,8 @@ function Profile() {
               };
             };
           };
-          alert(axiosErr?.response?.data?.message || 'Cập nhật thất bại');
+          const errorMsg = axiosErr?.response?.data?.message || error.message || 'Cập nhật thất bại';
+          alert(errorMsg);
         },
       }
     );
@@ -82,10 +93,6 @@ function Profile() {
 
   const formatPrice = (value: number) =>
     new Intl.NumberFormat("vi-VN").format(value) + "đ";
-
-  if (isLoading) {
-    return <div className="text-center py-12">Đang tải...</div>;
-  }
 
   return (
     <div className="mx-auto w-full max-w-7xl py-8 sm:py-12 mt-10">
@@ -163,14 +170,16 @@ function Profile() {
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleSave}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#6c935b] py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
+                    disabled={isPending}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-[#6c935b] py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <FiCheck size={16} />
-                    Lưu
+                    {isPending ? "Đang lưu..." : "Lưu"}
                   </button>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-lg border-2 border-neutral-300 py-3 text-sm font-semibold text-neutral-700 transition hover:border-neutral-400"
+                    disabled={isPending}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-lg border-2 border-neutral-300 py-3 text-sm font-semibold text-neutral-700 transition hover:border-neutral-400 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <FiX size={16} />
                     Hủy
@@ -184,7 +193,7 @@ function Profile() {
                     Tên
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {displayUser.name}
+                    {user.name}
                   </p>
                 </div>
 
@@ -193,7 +202,7 @@ function Profile() {
                     Email
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {displayUser.email}
+                    {user.email || "Chưa cập nhật"}
                   </p>
                 </div>
 
@@ -202,7 +211,7 @@ function Profile() {
                     Số điện thoại
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {displayUser.phone || "Chưa cập nhật"}
+                    {user.phone || "Chưa cập nhật"}
                   </p>
                 </div>
 
@@ -211,7 +220,7 @@ function Profile() {
                     Địa chỉ
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {displayUser.address || "Chưa cập nhật"}
+                    {user.address || "Chưa cập nhật"}
                   </p>
                 </div>
 
@@ -220,8 +229,8 @@ function Profile() {
                     Thành viên từ
                   </p>
                   <p className="mt-1 text-lg font-semibold text-neutral-900">
-                    {displayUser.createdAt 
-                      ? new Date(displayUser.createdAt).toLocaleDateString("vi-VN")
+                    {user.createdAt 
+                      ? new Date(user.createdAt).toLocaleDateString("vi-VN")
                       : "Chưa cập nhật"
                     }
                   </p>
@@ -249,7 +258,7 @@ function Profile() {
         </div>
 
         {/* Loyalty Points Card */}
-        <LoyaltyCard user={displayUser} formatPrice={formatPrice} />
+        <LoyaltyCard user={user} formatPrice={formatPrice} />
       </div>
     </div>
   );

@@ -28,7 +28,7 @@ type AuthContextType = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  fetchMe: () => Promise<void>;
+  fetchMe: (tokenOverride?: string) => Promise<void>;
   updateUserInfo: (updates: Partial<User>) => void;
   changePassword: (oldPassword: string, newPassword: string) => Promise<void>;
 };
@@ -55,24 +55,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
   const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
 
-  const fetchMe = async () => {
+  const fetchMe = async (tokenOverride?: string) => {
     try {
-      const token = getAccessToken();
+      // Use provided token or get from storage
+      const token = tokenOverride || getAccessToken();
 
       if (!token) {
+        console.warn('⚠️ No token available for fetchMe()');
         setUser(null);
         return;
       }
 
+      console.log('📝 Fetching user data with token...');
       const res = await axios.get(`${API_URL}/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
+      console.log('✅ User data fetched successfully:', res.data);
       setUser(res.data);
-    } catch (error) {
-      console.error("Lấy thông tin người dùng thất bại:", error);
+    } catch (error: any) {
+      console.error("❌ Lấy thông tin người dùng thất bại:", error);
 
       // thử refresh access token nếu access token hết hạn
       try {
@@ -80,12 +84,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (!refreshToken) throw new Error("No refresh token");
 
+        console.log('🔄 Refreshing access token...');
         const refreshRes = await axios.post(`${API_URL}/refresh`, {
           refreshToken,
         });
 
         const newAccessToken = refreshRes.data.access_token;
-        localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+        
+        // Try to save new token
+        try {
+          localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+          console.log('✅ New token saved to localStorage');
+        } catch (storageErr) {
+          console.warn('⚠️ Could not save new token to localStorage:', storageErr);
+        }
 
         const meRes = await axios.get(`${API_URL}/me`, {
           headers: {
@@ -93,9 +105,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         });
 
+        console.log('✅ User data fetched after token refresh:', meRes.data);
         setUser(meRes.data);
-      } catch (refreshError) {
-        console.error("Làm mới token thất bại:", refreshError);
+      } catch (refreshError: any) {
+        console.error("❌ Làm mới token thất bại:", refreshError);
         clearTokens();
         setUser(null);
       }
