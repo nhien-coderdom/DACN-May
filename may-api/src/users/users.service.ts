@@ -10,16 +10,13 @@ import bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/updateUserProfile.dto.js';
 import { UserRole } from '@prisma/client';
 import { UpdateUserRoleDto } from './dto/updateUserRole.dto.js';
-<<<<<<< Updated upstream
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import tz from 'dayjs/plugin/timezone.js';
+import { calculateEarnedPoints } from '../utils/loyalty.util.js';
 
 dayjs.extend(utc);
 dayjs.extend(tz);
-=======
-import { calculateEarnedPoints } from '../utils/loyalty.util.js';
->>>>>>> Stashed changes
 
 @Injectable()
 export class UsersService {
@@ -28,7 +25,6 @@ export class UsersService {
     const users = await this.prisma.user.findMany({
       where: showDeleted ? { isDeleted: true } : { isDeleted: false },
     });
-<<<<<<< Updated upstream
 
     // Tính toán thống kê đơn hàng cho mỗi user từ dữ liệu thực
     const usersWithStats = await Promise.all(
@@ -64,23 +60,6 @@ export class UsersService {
     );
 
     return usersWithStats;
-=======
-    return users.map((user) => ({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      address: user.address,
-      role: user.role,
-      loyaltyPoint: user.loyaltyPoint,
-      totalOrders: user.totalOrders,
-      totalSpent: user.totalSpent,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      isDeleted: user.isDeleted,
-      deletedAt: user.deletedAt,
-    }));
->>>>>>> Stashed changes
   }
 
   async getMyProfile(userId: number) {
@@ -121,20 +100,6 @@ export class UsersService {
   async getProfile(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-<<<<<<< Updated upstream
-=======
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        role: true,
-        loyaltyPoint: true,
-        totalOrders: true,
-        totalSpent: true,
-        createdAt: true,
-      },
->>>>>>> Stashed changes
     });
 
     if (!user) {
