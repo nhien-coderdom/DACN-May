@@ -21,11 +21,34 @@ export class AuthService {
 
   // ================= CHECK PHONE =================
   async checkPhone(phone: string) {
-    const normalizedPhone = phone.replace('+84', '0');
-    const user = await this.prisma.user.findUnique({
-      where: { phone: normalizedPhone },
-    });
-    return { exists: !!user };
+    try {
+      if (!phone || typeof phone !== 'string') {
+        throw new BadRequestException('Phone number is required');
+      }
+
+      const normalizedPhone = phone.replace('+84', '0');
+      
+      // Validate phone format
+      if (!/^0\d{9}$/.test(normalizedPhone)) {
+        throw new BadRequestException('Invalid phone format');
+      }
+
+      const user = await this.prisma.user.findUnique({
+        where: { phone: normalizedPhone },
+      });
+      return { exists: !!user };
+    } catch (error: any) {
+      // If already a BadRequestException, re-throw it
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      
+      // Log database errors for debugging
+      console.error('❌ checkPhone error:', error.message);
+      
+      // Return a safe error response
+      throw new BadRequestException('Unable to verify phone number. Please try again.');
+    }
   }
 
   // ================= LOGIN EMAIL =================
