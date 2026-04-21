@@ -12,6 +12,11 @@ import MyOrders from "./pages/MyOrders";
 import Profile from "./profile/pages/Profile";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailed from "./pages/PaymentFailed";
+import Loyalty from "./pages/info/Loyalty";
+import Contact from "./pages/info/Contact";
+import PurchasePolicy from "./pages/info/PurchasePolicy";
+import PrivacyPolicy from "./pages/info/PrivacyPolicy";
+import Terms from "./pages/info/Terms";
 
 function App() {
   return (
@@ -26,6 +31,11 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/loyalty" element={<Loyalty />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/purchase-policy" element={<PurchasePolicy />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { FaFacebook, FaTiktok, FaEnvelope } from "react-icons/fa";
 
 function Footer() {
@@ -11,7 +12,7 @@ function Footer() {
           {/* LEFT: LOGO */}
           <div className="flex flex-col items-center md:items-start gap-120">
             <img
-              src="../src/assets/may_logo.png"
+              src="/src/assets/may_logo.png"
               alt="May Logo"
               className="w-50 object-contain"
             />
@@ -54,11 +55,11 @@ function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/80">
 
           <div className="flex flex-wrap gap-6">
-            <span className="hover:text-white cursor-pointer">Thành viên và tích điểm giảm giá</span>
-            <span className="hover:text-white cursor-pointer">Liên hệ</span>
-            <span className="hover:text-white cursor-pointer">Chính sách mua hàng</span>
-            <span className="hover:text-white cursor-pointer">Chính sách bảo mật</span>
-            <span className="hover:text-white cursor-pointer">Điều khoản & lưu ý</span>
+            <Link to="/loyalty" className="hover:text-white cursor-pointer">Thành viên và tích điểm giảm giá</Link>
+            <Link to="/contact" className="hover:text-white cursor-pointer">Liên hệ</Link>
+            <Link to="/purchase-policy" className="hover:text-white cursor-pointer">Chính sách mua hàng</Link>
+            <Link to="/privacy-policy" className="hover:text-white cursor-pointer">Chính sách bảo mật</Link>
+            <Link to="/terms" className="hover:text-white cursor-pointer">Điều khoản & lưu ý</Link>
           </div>
 
           <div className="text-white/60">
