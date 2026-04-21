@@ -111,8 +111,11 @@ function Register() {
 
       // Navigate home
       navigate("/");
-    } catch (err) {
-      setError("Mã OTP không chính xác hoặc đã hết hạn.");
+    } catch (err: any) {
+      console.error("❌ Login error:", err);
+      const serverMsg = err.response?.data?.message;
+      const firebaseMsg = err.message;
+      setError(serverMsg || firebaseMsg || "Mã OTP không chính xác hoặc đã hết hạn.");
     } finally {
       setLoading(false);
     }
