@@ -97,8 +97,8 @@ export default function OrderSummary({
       {usePointsAmount > 0 && (
         <div className="mt-4 rounded-lg bg-blue-50 border border-blue-200 p-3">
           <p className="text-xs text-blue-700">
-            <span className="font-semibold">💡 Hay biết:</span> Bạn sẽ nhận{" "}
-            {Math.floor(finalAmount / 1000)} điểm từ đơn hàng này!
+            <span className="font-semibold">💡 Hãy biết:</span> Bạn sẽ nhận{" "}
+            {Math.floor(finalAmount / 10)} điểm từ đơn hàng này!
           </p>
         </div>
       )}

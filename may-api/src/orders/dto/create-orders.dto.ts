@@ -6,35 +6,40 @@ import {
   IsArray,
   ValidateNested,
   IsOptional,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { PaymentMethod } from '@prisma/client';
 
 // Item DTO
 export class CreateOrderItemDto {
   @IsInt()
-  productId: number;
+  productId!: number;
 
   @IsInt()
   @Min(1)
-  quantity: number;
+  quantity!: number;
 
   @IsOptional()
   @IsArray()
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  @Type(() => Number)
   toppings?: number[];
 }
 
 // Order DTO
 export class CreateOrderDto {
   @IsInt()
-  userId: number;
+  userId!: number;
 
   @IsString()
   @IsNotEmpty()
-  phone: string;
+  phone!: string;
 
   @IsString()
   @IsNotEmpty()
-  address: string;
+  address!: string;
 
   @IsOptional()
   @IsInt()
@@ -44,5 +49,9 @@ export class CreateOrderDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateOrderItemDto)
-  items: CreateOrderItemDto[];
+  items!: CreateOrderItemDto[];
+
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  paymentMethod?: PaymentMethod;
 }

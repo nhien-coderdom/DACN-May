@@ -1,19 +1,90 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiPackage } from "react-icons/fi";
 import { useOrders } from "../contexts/OrdersContext";
 import { useAuth } from "../contexts/AuthContext";
 import OrderCard from "../components/OrderCard";
+import { getSocket } from "../lib/socket";
 import type {
   Order,
   OrderItem,
   OrderStatus,
 } from "../contexts/OrdersContext";
 
+// Retry Payment Button Component
+interface RetryPaymentButtonProps {
+  orderId: number;
+}
+
+function RetryPaymentButton({ orderId }: RetryPaymentButtonProps) {
+  const { retryPayment, fetchOrders } = useOrders();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRetryVNPay = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await retryPayment(orderId, "VNPAY");
+      
+      if (result.nextAction === "REDIRECT" && result.paymentUrl) {
+        // Redirect to VNPAY payment URL
+        window.location.href = result.paymentUrl;
+      } else {
+        alert("Không thể tạo liên kết thanh toán. Vui lòng thử lại.");
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Lỗi khi thử lại thanh toán";
+      setError(message);
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRetryCOD = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await retryPayment(orderId, "CASH");
+      await fetchOrders();
+      alert("Chuyển sang phương thức COD thành công");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Lỗi khi thay đổi phương thức thanh toán";
+      setError(message);
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm text-gray-600 mb-3">Phương thức thanh toán thất bại. Vui lòng thử lại:</p>
+      <div className="flex gap-2">
+        <button
+          onClick={handleRetryVNPay}
+          disabled={loading}
+          className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold py-2 rounded-lg transition"
+        >
+          {loading ? "Đang xử lý..." : "Thử lại VNPAY"}
+        </button>
+        <button
+          onClick={handleRetryCOD}
+          disabled={loading}
+          className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white font-semibold py-2 rounded-lg transition"
+        >
+          {loading ? "Đang xử lý..." : "Chuyển sang COD"}
+        </button>
+      </div>
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+    </div>
+  );
+}
+
 function MyOrders() {
   const navigate = useNavigate();
   const { orders, fetchOrders, loading } = useOrders();
-  const { user } = useAuth();
+  const { user, fetchMe } = useAuth();
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -26,8 +97,61 @@ function MyOrders() {
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
+    if (!user?.id) return;
+
     fetchOrders();
-  }, []);
+
+    const socket = getSocket();
+
+    const handleNewOrder = (order: { userId?: number }) => {
+      if (!user?.id || order.userId !== user.id) return;
+      fetchOrders();
+    };
+
+    const handleOrderUpdated = (order: { userId?: number }) => {
+      if (!user?.id || order.userId !== user.id) return;
+      fetchOrders();
+      fetchMe();
+    };
+
+    socket.on("new-order", handleNewOrder);
+    socket.on("order-updated", handleOrderUpdated);
+
+    const handleFocus = () => {
+      fetchOrders();
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchOrders();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      socket.off("new-order", handleNewOrder);
+      socket.off("order-updated", handleOrderUpdated);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!selectedOrder) return;
+
+    const latestOrder = orders.find((order) => order.id === selectedOrder.id);
+    if (!latestOrder) {
+      setSelectedOrder(null);
+      return;
+    }
+
+    if (latestOrder !== selectedOrder) {
+      setSelectedOrder(latestOrder);
+    }
+  }, [orders, selectedOrder]);
 
   const userOrders = user
     ? orders.filter((order) => order.userId === user.id)
@@ -62,6 +186,7 @@ function MyOrders() {
         return "Đang chuẩn bị";
       case "SHIPPING":
         return "Đang giao";
+      case "COMPLETED":
       case "DELIVERED":
         return "Đã giao thành công";
       case "CANCELLED":
@@ -81,6 +206,7 @@ function MyOrders() {
         return "bg-violet-400";
       case "SHIPPING":
         return "bg-orange-400";
+      case "COMPLETED":
       case "DELIVERED":
         return "bg-emerald-500";
       case "CANCELLED":
@@ -125,7 +251,7 @@ function MyOrders() {
 
   if (!user) {
     return (
-      <div className="mx-auto mt-20 w-full max-w-5xl px-4 py-14 text-center">
+      <div className="mx-auto mt-10 w-full max-w-5xl px-4 py-14 text-center">
         <h1 className="mb-3 text-2xl font-bold">Vui lòng đăng nhập</h1>
         <button
           onClick={() => navigate("/login")}
@@ -140,7 +266,6 @@ function MyOrders() {
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-14 text-center">
-        Đang tải...
       </div>
     );
   }
@@ -266,7 +391,6 @@ function MyOrders() {
                 <h3 className="mb-3 font-bold">Sản phẩm</h3>
                 <div className="space-y-3">
                   {selectedOrder.items.map((item) => {
-                    console.log("Item:", item);
                     return (<div key={item.id} className="flex justify-between rounded-xl bg-neutral-50 p-3" >
                       <div>
                         <img src={item.product?.imageUrl || "/placeholder.png"} alt={item.productName} className="h-16 w-16 rounded-lg object-cover" />
@@ -288,9 +412,42 @@ function MyOrders() {
                   <p className="text-sm">{selectedOrder.phone}</p> <p className="text-sm">
                     {selectedOrder.address}</p> </div> <div className="rounded-xl bg-neutral-50 p-4">
                   <p className="text-xs text-neutral-400">Điểm thưởng</p>
-                  <p className="text-sm"> Dùng: {selectedOrder.usedPoint} </p>
-                  <p className="text-sm text-emerald-600"> +{selectedOrder.earnedPoint} </p>
-                </div> </div> {/* TOTAL */} <div className="flex justify-between border-t pt-4 text-lg font-bold">
+                  <p className="text-sm"> Dùng: {selectedOrder.usedPoint} điểm </p>
+                  <p className="text-sm text-emerald-600"> +{selectedOrder.earnedPoint} điểm </p>
+                </div> </div> {/* PAYMENT STATUS */}
+              {selectedOrder.payments && selectedOrder.payments.length > 0 && (
+                <div className="rounded-xl bg-neutral-50 p-4">
+                  <p className="text-xs text-neutral-400 mb-2">Thanh toán</p>
+                  {selectedOrder.payments.map((payment) => (
+                    <div key={payment.id} className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-semibold">
+                          {payment.method === "CASH" ? "Thanh toán khi nhận hàng (COD)" : payment.method}
+                        </p>
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                          payment.status === "SUCCESS" ? "bg-green-100 text-green-700" :
+                          payment.status === "FAILED" ? "bg-red-100 text-red-700" :
+                          payment.status === "PENDING" ? "bg-amber-100 text-amber-700" :
+                          "bg-gray-100 text-gray-700"
+                        }`}>
+                          {payment.status === "SUCCESS" ? "Thành công" :
+                           payment.status === "FAILED" ? "Thất bại" :
+                           payment.status === "PENDING" ? "Chờ xử lý" :
+                           payment.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-neutral-600">{payment.amount.toLocaleString("vi-VN")}đ</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* RETRY PAYMENT BUTTON */}
+              {selectedOrder.status === "PENDING" && 
+               selectedOrder.payments?.some(p => p.status === "FAILED") && (
+                <RetryPaymentButton orderId={selectedOrder.id} />
+              )}
+              {/* TOTAL */} <div className="flex justify-between border-t pt-4 text-lg font-bold">
                 <span>Tổng</span> <span className="text-[#086136]"> {formatPrice(selectedOrder.total)} </span>
               </div>
             </div>

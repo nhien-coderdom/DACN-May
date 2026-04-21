@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FiCheckCircle } from "react-icons/fi";
-import { useCart } from "../contexts/CartContext";
+import { clearAllCartStorage, useCart } from "../contexts/CartContext";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -13,12 +13,12 @@ export default function PaymentSuccess() {
   const transactionId = searchParams.get("transactionId");
 
   useEffect(() => {
-    if (!orderId) return;
     if (hasClearedCart.current) return;
 
+    clearAllCartStorage();
     clearCart();
     hasClearedCart.current = true;
-  }, [orderId, clearCart]);
+  }, [clearCart]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-green-50 to-white">
