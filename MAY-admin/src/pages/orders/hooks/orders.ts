@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import * as OderService from '../services'
-import type { AdminOrder, OrderLog } from '../types/orders.types'
+import type { AdminOrder } from '../types/orders.types'
 
 
 // get all

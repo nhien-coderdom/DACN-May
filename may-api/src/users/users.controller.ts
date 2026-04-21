@@ -97,6 +97,13 @@ export class UsersController {
         return this.usersService.getLoyaltyInfo(Number(id));
     }
 
+    @Get(':id/details-with-stats')
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.STAFF)
+    getUserDetailsWithStats(@Param('id') id: string) {
+        return this.usersService.getUserDetailsWithStats(Number(id));
+    }
+
 
     // @Post(':id/loyalty/update-from-order')
     // @UseGuards(AuthGuard('jwt'), RolesGuard)

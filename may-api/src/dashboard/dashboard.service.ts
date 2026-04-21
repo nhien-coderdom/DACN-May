@@ -130,7 +130,6 @@ export class DashboardService {
       },
       _sum: {
         quantity: true,
-        basePrice: true,
       },
       orderBy: {
         _sum: {
@@ -145,11 +144,46 @@ export class DashboardService {
         const product = await this.prisma.product.findUnique({
           where: { id: item.productId },
         });
+
+        // Tính revenue đúng: SUM(basePrice * quantity)
+        const revenueData = await this.prisma.orderItem.aggregate({
+          where: {
+            productId: item.productId,
+            order: {
+              isDeleted: false,
+              status: 'COMPLETED',
+            },
+          },
+          _sum: {
+            basePrice: true,
+          },
+        });
+
+        // Lấy tất cả orderItems để tính tổng basePrice * quantity
+        const orderItems = await this.prisma.orderItem.findMany({
+          where: {
+            productId: item.productId,
+            order: {
+              isDeleted: false,
+              status: 'COMPLETED',
+            },
+          },
+          select: {
+            basePrice: true,
+            quantity: true,
+          },
+        });
+
+        const revenue = orderItems.reduce(
+          (sum, oi) => sum + oi.basePrice * oi.quantity,
+          0,
+        );
+
         return {
           productId: item.productId,
           name: product?.name,
           quantity: item._sum.quantity || 0,
-          revenue: (item._sum.basePrice || 0) * (item._sum.quantity || 0),
+          revenue,
         };
       }),
     );

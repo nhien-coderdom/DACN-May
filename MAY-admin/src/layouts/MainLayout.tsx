@@ -5,7 +5,7 @@ import { getSocket } from "@/lib/socket"
 
 export default function MainLayout() {
   useEffect(() => {
-    const socket = getSocket()
+    getSocket()
   }, [])
 
   return (
