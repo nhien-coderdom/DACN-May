@@ -21,8 +21,8 @@ export const RevenueFilter: React.FC<RevenueFilterProps> = ({
   const [customEndDate, setCustomEndDate] = useState('')
   const [dateError, setDateError] = useState<string>('')
 
-  // Lấy ngày hôm nay
-  const today = new Date().toISOString().split('T')[0]
+  // Lấy ngày hôm nay (local timezone)
+  const today = new Date().toLocaleDateString('en-CA')
 
   const ranges: { value: Exclude<DateRange, 'custom'>; label: string; description: string }[] = [
     { value: '7days', label: '7 Days', description: 'Last week' },

@@ -71,23 +71,25 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, 
           )}
 
           {/* Order Stats */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Thống Kê Đơn Hàng</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Số đơn hàng</p>
-                <p className="text-3xl font-bold text-blue-600">{user.totalOrders}</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Tổng chi tiêu</p>
-                <p className="text-3xl font-bold text-green-600">${user.totalSpent.toLocaleString()}</p>
-              </div>
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Điểm thưởng</p>
-                <p className="text-3xl font-bold text-purple-600">{user.loyaltyPoint}</p>
+          {!['ADMIN', 'STAFF'].includes(user.role) && (
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">Thống Kê Đơn Hàng</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Số đơn hàng</p>
+                  <p className="text-3xl font-bold text-blue-600">{user.totalOrders}</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Tổng chi tiêu</p>
+                  <p className="text-3xl font-bold text-green-600">${user.totalSpent.toLocaleString()}</p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">Điểm thưởng</p>
+                  <p className="text-3xl font-bold text-purple-600">{user.loyaltyPoint}</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Dates Info */}
           <div className="border-t pt-6">
@@ -107,23 +109,6 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, 
                   <p className="font-semibold text-red-600">{new Date(user.deletedAt).toLocaleString('vi-VN')}</p>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Status */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Trạng Thái</h3>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-2">Trạng thái xóa</p>
-              <span
-                className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold ${
-                  user.isDeleted
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-green-100 text-green-800'
-                }`}
-              >
-                {user.isDeleted ? 'Đã xóa' : 'Hoạt động'}
-              </span>
             </div>
           </div>
         </div>
