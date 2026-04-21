@@ -144,7 +144,7 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
         />
       </div>
 
-      {/* ✅ Upload */}
+      {/*   Upload */}
       <div className="mb-4">
         <CloudinaryUpload onUpload={handleUpload} />
 

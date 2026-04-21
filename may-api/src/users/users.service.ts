@@ -5,6 +5,12 @@ import bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/updateUserProfile.dto.js';
 import { UserRole } from '@prisma/client';
 import { UpdateUserRoleDto } from './dto/updateUserRole.dto.js';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import tz from 'dayjs/plugin/timezone.js';
+
+dayjs.extend(utc);
+dayjs.extend(tz);
 
 @Injectable()
 export class UsersService {
@@ -15,69 +21,114 @@ export class UsersService {
     const users = await this.prisma.user.findMany({
       where: showDeleted ? { isDeleted: true } : { isDeleted: false },
     });
-    return users.map(user => ({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      address: user.address,
-      role: user.role,
-      loyaltyPoint: user.loyaltyPoint,
-      totalOrders: user.totalOrders,
-      totalSpent: user.totalSpent,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      isDeleted: user.isDeleted,
-      deletedAt: user.deletedAt,
-    }));
+
+    // Tính toán thống kê đơn hàng cho mỗi user từ dữ liệu thực
+    const usersWithStats = await Promise.all(
+      users.map(async (user) => {
+        const orderStats = await this.prisma.order.aggregate({
+          where: {
+            userId: user.id,
+            isDeleted: false,
+            status: 'COMPLETED',
+          },
+          _count: true,
+          _sum: {
+            total: true,
+          },
+        });
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          address: user.address,
+          role: user.role,
+          loyaltyPoint: user.loyaltyPoint,
+          totalOrders: orderStats._count || 0,
+          totalSpent: orderStats._sum?.total || 0,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          isDeleted: user.isDeleted,
+          deletedAt: user.deletedAt,
+        };
+      })
+    );
+
+    return usersWithStats;
   }
 
   async getMyProfile(userId: number) {
-
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        role: true,
-        loyaltyPoint: true,
-        totalOrders: true,
-        totalSpent: true,
-        createdAt: true,
-      },
     });
 
     if (!user) {
       throw new Error('User not found');
     }
 
-    return user;
+    // Tính toán thống kê đơn hàng từ dữ liệu thực (chỉ COMPLETED)
+    const orderStats = await this.prisma.order.aggregate({
+      where: {
+        userId: userId,
+        isDeleted: false,
+        status: 'COMPLETED',
+      },
+      _count: true,
+      _sum: {
+        total: true,
+      },
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      loyaltyPoint: user.loyaltyPoint,
+      totalOrders: orderStats._count || 0,
+      totalSpent: orderStats._sum?.total || 0,
+      createdAt: user.createdAt,
+    };
   }
 
   async getProfile(userId: number) {
-
-
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        role: true,
-        loyaltyPoint: true,
-        totalOrders: true,
-        totalSpent: true,
-        createdAt: true,
-      }
-    })
+    });
 
     if (!user) {
       throw new Error('User not found');
     }
-    return user;
+
+    // Tính toán thống kê đơn hàng từ dữ liệu thực (chỉ COMPLETED)
+    const orderStats = await this.prisma.order.aggregate({
+      where: {
+        userId: userId,
+        isDeleted: false,
+        status: 'COMPLETED',
+      },
+      _count: true,
+      _sum: {
+        total: true,
+      },
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      loyaltyPoint: user.loyaltyPoint,
+      totalOrders: orderStats._count || 0,
+      totalSpent: orderStats._sum?.total || 0,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      address: user.address,
+      isDeleted: user.isDeleted,
+    };
   }
 
   async create(dto: CreateUserDto) {
@@ -307,5 +358,56 @@ export class UsersService {
         role: true,
       },
     });
+  }
+
+  // Lấy chi tiết người dùng với thống kê đơn hàng được tính từ các đơn hàng COMPLETED
+  async getUserDetailsWithStats(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Tính toán thống kê đơn hàng từ dữ liệu thực
+    const orderStats = await this.prisma.order.aggregate({
+      where: {
+        userId: userId,
+        isDeleted: false,
+        status: 'COMPLETED',
+      },
+      _count: true,
+      _sum: {
+        total: true,
+      },
+    });
+
+    const totalOrders = orderStats._count || 0;
+    const totalSpent = orderStats._sum?.total || 0;
+
+    // Format thời gian theo múi giờ Việt Nam
+    const createdAtVN = dayjs(user.createdAt)
+      .tz('Asia/Ho_Chi_Minh')
+      .format('HH:mm:ss DD/M/YYYY');
+
+    const updatedAtVN = dayjs(user.updatedAt)
+      .tz('Asia/Ho_Chi_Minh')
+      .format('HH:mm:ss DD/M/YYYY');
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      role: user.role,
+      created_at_vn: createdAtVN,
+      updated_at_vn: updatedAtVN,
+      loyaltyPoint: user.loyaltyPoint,
+      total_orders: totalOrders,
+      total_spent: totalSpent,
+      isDeleted: user.isDeleted,
+    };
   }
 }

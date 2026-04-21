@@ -26,11 +26,11 @@ export const useCreateUser = () => {
         mutationFn: (data: CreateUserDTO) => usersService.createUser(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] })
-            alert('✅ User created successfully!')
+            alert('  User created successfully!')
         },
         onError: (error: any) => {
             const message = error.response?.data?.message || error.message || 'Failed to create user'
-            alert(`❌ Error: ${message}`)
+            alert(`  Error: ${message}`)
         }
     })
 }
@@ -44,11 +44,11 @@ export const useUpdateUser = () => {
       onSuccess: (_, { id }) => {
         queryClient.invalidateQueries({ queryKey: ['users'] })
         queryClient.invalidateQueries({ queryKey: ['users', id] })
-        alert('✅ User updated successfully!')
+        alert('  User updated successfully!')
       },
       onError: (error: any) => {
         const message = error.response?.data?.message || error.message || 'Failed to update user'
-        alert(`❌ Error: ${message}`)
+        alert(`  Error: ${message}`)
         }
     })
 }
@@ -60,11 +60,11 @@ export const useDeleteUser = () => {
         mutationFn: (id: number) => usersService.deleteUser(id),
         onSuccess: () => { 
             queryClient.invalidateQueries({ queryKey: ['users'] })
-            alert('✅ User deleted successfully!')
+            alert('  User deleted successfully!')
         },
         onError: (error: any) => {
             const message = error.response?.data?.message || error.message || 'Failed to delete user'
-            alert(`❌ Error: ${message}`)
+            alert(`  Error: ${message}`)
         }
     })
 }
@@ -78,11 +78,11 @@ export const useUpdateUserRole = () => {
         onSuccess: (_, { id }) => {
             queryClient.invalidateQueries({ queryKey: ['users'] })
             queryClient.invalidateQueries({ queryKey: ['users', id] })
-            alert('✅ User role updated successfully!')
+            alert('  User role updated successfully!')
         },
         onError: (error: any) => {
             const message = error.response?.data?.message || error.message || 'Failed to update user role'
-            alert(`❌ Error: ${message}`)
+            alert(`  Error: ${message}`)
         }
     })
 }

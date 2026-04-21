@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OrderStatus } from '@prisma/client';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import tz from 'dayjs/plugin/timezone.js';
+
+dayjs.extend(utc);
+dayjs.extend(tz);
 
 @Injectable()
 export class OrderStatsService {
@@ -11,36 +17,30 @@ export class OrderStatsService {
     startDate?: string,
     endDate?: string,
   ) {
-    const now = new Date();
-    let fromDate = new Date();
-    let toDate = new Date();
-
-    // Helper function to parse date string safely in local timezone
-    const parseDateString = (dateStr: string): Date => {
-      const [year, month, day] = dateStr.split('-').map(Number);
-      return new Date(year, month - 1, day, 0, 0, 0, 0);
-    };
+    let fromDateUTC: Date;
+    let toDateUTC: Date;
 
     if (startDate && endDate) {
-      fromDate = parseDateString(startDate);
-      toDate = parseDateString(endDate);
+      // Custom date range - parse as VN dates and convert to UTC
+      const startDayjs = dayjs.tz(startDate, 'YYYY-MM-DD', 'Asia/Ho_Chi_Minh');
+      const endDayjs = dayjs.tz(endDate, 'YYYY-MM-DD', 'Asia/Ho_Chi_Minh');
+      
+      fromDateUTC = startDayjs.startOf('day').utc().toDate();
+      toDateUTC = endDayjs.endOf('day').utc().toDate();
     } else {
-      if (range === '7days') {
-        fromDate.setDate(now.getDate() - 7);
-      } else if (range === '30days') {
-        fromDate.setDate(now.getDate() - 30);
-      } else if (range === '90days') {
-        fromDate.setDate(now.getDate() - 90);
-      } else if (range === '1year') {
-        fromDate.setFullYear(now.getFullYear() - 1);
-      } else {
-        fromDate.setDate(now.getDate() - 7);
-      }
-      toDate = new Date(now);
-    }
+      // Preset range - calculate based on VN timezone
+      const nowVN = dayjs().tz('Asia/Ho_Chi_Minh');
 
-    fromDate.setHours(0, 0, 0, 0);
-    toDate.setHours(23, 59, 59, 999);
+      let daysAgo = 6; // Default 7 days
+      if (range === '7days') daysAgo = 6;
+      else if (range === '30days') daysAgo = 29;
+      else if (range === '90days') daysAgo = 89;
+      else if (range === '1year') daysAgo = 364;
+
+      // Calculate from date in VN timezone, convert to UTC
+      fromDateUTC = nowVN.subtract(daysAgo, 'day').startOf('day').utc().toDate();
+      toDateUTC = nowVN.endOf('day').utc().toDate();
+    }
 
     // Get counts for each status
     const statuses: OrderStatus[] = [
@@ -57,8 +57,8 @@ export class OrderStatsService {
         where: {
           status,
           createdAt: {
-            gte: fromDate,
-            lte: toDate,
+            gte: fromDateUTC,
+            lte: toDateUTC,
           },
         },
       });

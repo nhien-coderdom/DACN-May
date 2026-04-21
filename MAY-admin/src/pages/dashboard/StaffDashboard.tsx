@@ -154,11 +154,11 @@ export default function Dashboard() {
     fetchOrders()
 
     socket.on("connect", () => {
-      console.log("✅ Socket connected:", socket.id)
+      console.log("  Socket connected:", socket.id)
     })
 
     socket.on("new-order", (newOrder: Order) => {
-      console.log("🆕 New order:", newOrder)
+      console.log("  New order:", newOrder)
 
       setOrders((prev) => {
         const existed = prev.some((o) => o.id === newOrder.id)
@@ -172,7 +172,7 @@ export default function Dashboard() {
     })
 
     socket.on("order-updated", (updatedOrder: Order) => {
-      console.log("🔄 Order updated:", updatedOrder)
+      console.log("  Order updated:", updatedOrder)
 
       setOrders((prev) =>
         prev.map((order) =>

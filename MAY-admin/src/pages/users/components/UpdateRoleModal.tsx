@@ -91,13 +91,13 @@ export const UpdateRoleModal: React.FC<UpdateRoleModalProps> = ({ user, onSubmit
               className="w-full border rounded px-3 py-2"
             >
               <option value="CUSTOMER" disabled={disabledRoles.includes('CUSTOMER')}>
-                {disabledRoles.includes('CUSTOMER') ? '❌ CUSTOMER' : 'CUSTOMER'}
+                {disabledRoles.includes('CUSTOMER') ? '  CUSTOMER' : 'CUSTOMER'}
               </option>
               <option value="STAFF" disabled={disabledRoles.includes('STAFF')}>
-                {disabledRoles.includes('STAFF') ? '❌ STAFF' : 'STAFF'}
+                {disabledRoles.includes('STAFF') ? '  STAFF' : 'STAFF'}
               </option>
               <option value="ADMIN" disabled={disabledRoles.includes('ADMIN')}>
-                {disabledRoles.includes('ADMIN') ? '❌ ADMIN' : 'ADMIN'}
+                {disabledRoles.includes('ADMIN') ? '  ADMIN' : 'ADMIN'}
               </option>
             </select>
           </div>
@@ -106,10 +106,10 @@ export const UpdateRoleModal: React.FC<UpdateRoleModalProps> = ({ user, onSubmit
           <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs">
             <p className="font-semibold text-blue-900 mb-2">STT Role Change Rules:</p>
             <ul className="text-blue-800 space-y-1">
-              <li>✅ STAFF → ADMIN (always allowed)</li>
-              <li>✅ ADMIN → STAFF (if ≥1 admin remains)</li>
-              <li>❌ CUSTOMER → STAFF (security risk)</li>
-              <li>❌ CUSTOMER → ADMIN (security risk)</li>
+              <li>  STAFF → ADMIN (always allowed)</li>
+              <li>  ADMIN → STAFF (if ≥1 admin remains)</li>
+              <li>  CUSTOMER → STAFF (security risk)</li>
+              <li>  CUSTOMER → ADMIN (security risk)</li>
             </ul>
           </div>
 

@@ -11,12 +11,12 @@ export default function CloudinaryUpload({ onUpload }: CloudinaryUploadProps) {
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-  // ✅ luôn giữ callback mới nhất
+  //   luôn giữ callback mới nhất
   useEffect(() => {
     onUploadRef.current = onUpload;
   }, [onUpload]);
 
-  // ✅ chỉ tạo widget 1 lần
+  //   chỉ tạo widget 1 lần
   useEffect(() => {
     if (!window.cloudinary) return;
 
@@ -47,7 +47,7 @@ export default function CloudinaryUpload({ onUpload }: CloudinaryUploadProps) {
       }
     );
 
-    // ✅ cleanup tránh memory leak
+    //   cleanup tránh memory leak
     return () => {
       widgetRef.current = null;
     };

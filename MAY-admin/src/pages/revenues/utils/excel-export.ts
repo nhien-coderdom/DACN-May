@@ -46,8 +46,8 @@ export const exportOrdersToExcel = (ordersData: any) => {
         formattedData = [
             {
                 Status: 'Completed',
-                Orders: ordersData.stats?.CONFIRMED || 0,
-                Percentage: `${ordersData.percentages?.CONFIRMED || 0}%`
+                Orders: ordersData.stats?.COMPLETED || 0,
+                Percentage: `${ordersData.percentages?.COMPLETED || 0}%`
             },
             {
                 Status: 'Shipping',

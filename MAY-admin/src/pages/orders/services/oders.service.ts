@@ -1,6 +1,6 @@
 import axiosClient from '@/utils/axios'
 
-import type { AdminOrder, OrderLog } from '../types/orders.types'
+import type { AdminOrder } from '../types/orders.types'
 
 
 

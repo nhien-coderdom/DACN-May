@@ -48,13 +48,6 @@ const RevenuesPage: React.FC = () => {
     return revenueRange
   }
 
-  const getOrdersDisplayRange = () => {
-    if (ordersRange === 'custom' && ordersStartDate && ordersEndDate) {
-      return `${ordersStartDate} to ${ordersEndDate}`
-    }
-    return ordersRange
-  }
-
   const getPieChartData = () => {
     if (!orderStatsData) return []
     

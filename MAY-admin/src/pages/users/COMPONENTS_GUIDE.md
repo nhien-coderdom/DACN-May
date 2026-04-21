@@ -48,9 +48,9 @@ Complete user management module for the admin panel with role management and CRU
 ### 4. **UpdateRoleModal.tsx** - Role Change Modal
 - Dedicated modal for changing user roles
 - Applies role change rules enforce by backend:
-  - ✅ STAFF → ADMIN: Allowed (only admin can execute)
-  - ✅ ADMIN → STAFF: Allowed (only if ≥1 active admin remains)
-  - ❌ CUSTOMER → ADMIN/STAFF: Not allowed
+  -   STAFF → ADMIN: Allowed (only admin can execute)
+  -   ADMIN → STAFF: Allowed (only if ≥1 active admin remains)
+  -   CUSTOMER → ADMIN/STAFF: Not allowed
 - Shows warning/info messages based on role transition
 - Props:
   - `user`: User
@@ -127,20 +127,20 @@ UsersList (Container)
 ## Role Management Rules
 
 ### Rule 1: CUSTOMER → ADMIN/STAFF
-- ❌ **Not allowed** - Frontend blocks, Backend validates
+-   **Not allowed** - Frontend blocks, Backend validates
 - Backend throws: `ForbiddenException`
 
 ### Rule 2: ADMIN → STAFF
-- ✅ **Allowed only if ≥1 active admin remains**
+-   **Allowed only if ≥1 active admin remains**
 - Backend checks: `isDeleted = false & role = ADMIN & id != userId`
 - If fails: `ForbiddenException('Cannot demote the last active admin...')`
 
 ### Rule 3: STAFF → ADMIN
-- ✅ **Allowed** (no additional checks)
+-   **Allowed** (no additional checks)
 - Only admins can execute (already guarded by `@Roles(UserRole.ADMIN)`)
 
 ### Rule 4: ADMIN → ADMIN, CUSTOMER → CUSTOMER, STAFF → STAFF
-- ✅ **Allowed** (no-op)
+-   **Allowed** (no-op)
 
 ## Notes
 - All timestamps are formatted to Vietnamese locale

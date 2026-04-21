@@ -60,7 +60,7 @@ export function formatPrice(price: number): string {
  */
 export function getStatusIcon(status: OrderStatus): string {
   const icons: Record<OrderStatus, string> = {
-    PENDING: '⏳',
+    PENDING: ' ',
     CONFIRMED: '✓',
     SHIPPING: '🚚',
     COMPLETED: '✓✓',
