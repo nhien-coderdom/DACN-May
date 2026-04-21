@@ -13,7 +13,8 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
     name: initialData?.name || '',
     phone: initialData?.phone || '',
     address: initialData?.address || '',
-    role: 'CUSTOMER',
+    password: '',
+    role: 'STAFF',
   })
 
   useEffect(() => {
@@ -23,7 +24,8 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
         name: initialData.name,
         phone: initialData.phone,
         address: initialData.address || '',
-        role: 'CUSTOMER',
+        password: '',
+        role: 'STAFF',
       })
     }
   }, [initialData])
@@ -52,7 +54,8 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
         email: formData.email,
         name: formData.name,
         phone: formData.phone,
-        role: (formData.role as any) || 'CUSTOMER',
+        password: formData.password,
+        role: (formData.role as any) || 'STAFF',
       }
       onSubmit(createData)
     }
@@ -128,7 +131,6 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
               onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
               className="w-full border rounded px-3 py-2"
             >
-              <option value="CUSTOMER">CUSTOMER</option>
               <option value="STAFF">STAFF</option>
               <option value="ADMIN">ADMIN</option>
             </select>
