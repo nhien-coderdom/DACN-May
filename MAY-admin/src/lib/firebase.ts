@@ -8,7 +8,7 @@ import { getAuth } from "firebase/auth/web-extension";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDbPm5VW8nvVA6pnBJNAzJeNqMecjmqDNw",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "may-auth.firebaseapp.com",
   projectId: "may-auth",
   storageBucket: "may-auth.firebasestorage.app",
