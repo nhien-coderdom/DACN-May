@@ -63,7 +63,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
     <Card className="p-6">
       <div className="flex items-center gap-2 mb-6">
         <Calendar size={20} className="text-blue-600" />
-        <h2 className="text-lg font-semibold text-gray-900">Revenue Trend</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Xu hướng doanh thu</h2>
       </div>
 
       {data && data.length > 0 ? (
@@ -179,18 +179,18 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
         </div>
       ) : (
         <div className="text-center py-12 text-gray-500">
-          <p>No revenue data available for this period</p>
+          <p>Không có dữ liệu doanh thu nào cho khoảng thời gian này</p>
         </div>
       )}
 
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-4 mt-12 pt-6 border-t">
         <div>
-          <p className="text-xs text-gray-600 font-medium">Total Days</p>
+          <p className="text-xs text-gray-600 font-medium">Tổng số ngày</p>
           <p className="text-lg font-bold text-gray-900">{data?.length || 0}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-600 font-medium">Average Daily</p>
+          <p className="text-xs text-gray-600 font-medium">Trung bình mỗi ngày</p>
           <p className="text-lg font-bold text-gray-900">
             {data && data.length > 0
               ? formatCurrency(data.reduce((sum, d) => sum + d.total, 0) / data.length)
@@ -198,7 +198,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-600 font-medium">Peak Day</p>
+          <p className="text-xs text-gray-600 font-medium">Ngày cao điểm</p>
           <p className="text-lg font-bold text-gray-900">
             {data && data.length > 0
               ? formatCurrency(Math.max(...data.map(d => d.total)))

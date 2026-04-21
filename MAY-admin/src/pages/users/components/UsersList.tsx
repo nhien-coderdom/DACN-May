@@ -20,11 +20,11 @@ export const UsersList: React.FC<UsersListProps> = ({
   onUpdateRole,
 }) => {
   if (isLoading) {
-    return <div className="text-center py-8">Loading...</div>
+    return <div className="text-center py-8">Đang tải...</div>
   }
 
   if (!users || users.length === 0) {
-    return <div className="text-center py-8 text-gray-500">No users found</div>
+    return <div className="text-center py-8 text-gray-500">Không tìm thấy người dùng</div>
   }
 
   const getRoleColor = (role: string) => {
@@ -44,14 +44,14 @@ export const UsersList: React.FC<UsersListProps> = ({
             <tr>
               <th className="px-4 py-3 text-left text-sm font-semibold">ID</th>
               <th className="px-4 py-3 text-left text-sm font-semibold">Email</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Name</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Phone</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Role</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Orders</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Spent</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Loyalty</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Created</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Actions</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Tên</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Số điện thoại</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Vai trò</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Đơn hàng</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Chi tiêu</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Điểm trung thành</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Ngày tạo</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -78,30 +78,30 @@ export const UsersList: React.FC<UsersListProps> = ({
                   <button
                     onClick={() => onView(user.id)}
                     className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs"
-                    title="View user details"
+                    title="Xem chi tiết người dùng"
                   >
-                    View
+                    Xem
                   </button>
                   <button
                     onClick={() => onEdit(user.id)}
                     className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
                   >
-                    Edit
+                    Chỉnh sửa
                   </button>
                   <button
                     onClick={() => onUpdateRole(user.id)}
                     disabled={user.role === 'CUSTOMER'}
-                    title={user.role === 'CUSTOMER' ? 'Customers cannot change roles for security' : ''}
+                    title={user.role === 'CUSTOMER' ? 'Khách hàng không thể thay đổi vai trò vì lý do bảo mật' : ''}
                     className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Change Role
+                    Thay đổi vai trò
                   </button>
                   <button
                     onClick={() => onDelete(user.id)}
                     className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
-                    title="Delete this user"
+                    title="Xóa người dùng này"
                   >
-                    Delete
+                    Xóa
                   </button>
                 </td>
               </tr>

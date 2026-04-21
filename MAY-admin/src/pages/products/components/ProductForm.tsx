@@ -78,12 +78,12 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
   return (
     <form onSubmit={handleSubmit}>
       <h2 className="text-xl font-bold mb-4">
-        {initialData ? 'Edit Product' : 'Add Product'}
+        {initialData ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}
       </h2>
 
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">
-          Name <span className="text-red-500">*</span>
+          Tên <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -97,7 +97,7 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
 
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">
-          Price <span className="text-red-500">*</span>
+          Giá <span className="text-red-500">*</span>
         </label>
         <input
           type="number"
@@ -113,11 +113,11 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
 
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">
-          Category <span className="text-red-500">*</span>
+          Danh mục <span className="text-red-500">*</span>
         </label>
 
         {isCategoriesLoading ? (
-          <div className="px-3 py-2 border rounded bg-gray-100">Loading...</div>
+          <div className="px-3 py-2 border rounded bg-gray-100">Đang tải...</div>
         ) : (
           <select
             name="categoryId"
@@ -135,7 +135,7 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
       </div>
 
       <div className="mb-4">
-        <label>Description</label>
+        <label>Mô tả</label>
         <textarea
           name="description"
           value={formData.description}
@@ -158,14 +158,14 @@ export const ProductForm = ({ initialData, onSubmit, onClose }: ProductFormProps
 
       <div className="flex gap-3 justify-end">
         <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
-          Cancel
+          Hủy
         </button>
         <button
           type="submit"
           disabled={!formData.categoryId}
           className="px-4 py-2 bg-blue-500 text-white rounded"
         >
-          {initialData ? 'Update' : 'Create'}
+          {initialData ? 'Cập nhật' : 'Tạo mới'}
         </button>
       </div>
     </form>

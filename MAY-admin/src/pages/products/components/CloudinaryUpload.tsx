@@ -59,7 +59,7 @@ export default function CloudinaryUpload({ onUpload }: CloudinaryUploadProps) {
       onClick={() => widgetRef.current?.open()}
       className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500"
     >
-      Click to upload image
+      Tải ảnh lên
     </button>
   );
 }

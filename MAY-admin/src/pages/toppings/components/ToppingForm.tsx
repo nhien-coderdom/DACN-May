@@ -52,13 +52,13 @@ export const ToppingForm = ({ initialData, onSubmit, onClose }: ToppingFormProps
     <form onSubmit={handleSubmit}>
       {/* =================== TIÊU ĐỀ =================== */}
       <h2 className="text-xl font-bold mb-4">
-        {initialData ? 'Edit Topping' : 'Add Topping'}
+        {initialData ? 'Chỉnh sửa Topping' : 'Thêm Topping'}
       </h2>
 
       {/* =================== FIELD: NAME =================== */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">
-          Name <span className="text-red-500">*</span>
+          Tên <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -67,14 +67,14 @@ export const ToppingForm = ({ initialData, onSubmit, onClose }: ToppingFormProps
           onChange={handleChange}
           required
           className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="ex: Extra milk, Brown sugar, ..."
+          placeholder="ví dụ: Sữa thêm, Đường nâu, ..."
         />
       </div>
 
       {/* =================== FIELD: PRICE =================== */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">
-          Price <span className="text-red-500">*</span>
+          Giá <span className="text-red-500">*</span>
         </label>
         <input
           type="number"
@@ -96,13 +96,13 @@ export const ToppingForm = ({ initialData, onSubmit, onClose }: ToppingFormProps
           onClick={onClose}
           className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition"
         >
-          Cancel
+          Hủy
         </button>
         <button
           type="submit"
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
         >
-          {initialData ? 'Update' : 'Create'}
+          {initialData ? 'Cập nhật' : 'Tạo mới'}
         </button>
       </div>
     </form>

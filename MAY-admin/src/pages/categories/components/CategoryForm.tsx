@@ -41,17 +41,17 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, onSubmi
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-bold mb-4">
-        {initialData ? 'Edit Category' : 'Create New Category'}
+        {initialData ? 'Chỉnh sửa danh mục' : 'Tạo mới danh mục'}
       </h2>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Category Name</label>
+        <label className="block text-sm font-medium mb-1">Tên danh mục</label>
         <input
           type="text"
           name="name"
           value={formData.name}
           onChange={handleChange}
-          placeholder="Enter category name"
+          placeholder="Nhập tên danh mục"
           className="w-full border rounded px-3 py-2"
           required
         />
@@ -64,7 +64,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, onSubmi
           name="slug"
           value={formData.slug}
           onChange={handleChange}
-          placeholder="Enter slug"
+          placeholder="Nhập slug"
           className="w-full border rounded px-3 py-2"
           required
         />
@@ -76,13 +76,13 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, onSubmi
           onClick={onClose}
           className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
         >
-          Cancel
+          Hủy
         </button>
         <button
           type="submit"
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
         >
-          {initialData ? 'Update' : 'Create'}
+          {initialData ? 'Cập nhật' : 'Tạo mới'}
         </button>
       </div>
     </form>

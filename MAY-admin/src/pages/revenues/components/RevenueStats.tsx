@@ -19,10 +19,10 @@ export const RevenueStats: React.FC<RevenueStatsProps> = ({ totalRevenue, range 
 
   const getRangeLabel = (r: string): string => {
     const labels: Record<string, string> = {
-      '7days': 'Last 7 Days',
-      '30days': 'Last 30 Days',
-      '90days': 'Last 90 Days',
-      '1year': 'Last Year',
+      '7days': '7 ngày qua',
+      '30days': '30 ngày qua',
+      '90days': '90 ngày qua',
+      '1year': '1 năm qua',
     }
     return labels[r] || r
   }
@@ -34,7 +34,7 @@ export const RevenueStats: React.FC<RevenueStatsProps> = ({ totalRevenue, range 
           <TrendingUp className="text-white" size={32} />
         </div>
         <div className="flex-1">
-          <p className="text-gray-600 text-sm font-medium">Total Revenue</p>
+          <p className="text-gray-600 text-sm font-medium">Tổng Doanh Thu</p>
           <p className="text-gray-600 text-xs mt-1">{getRangeLabel(range)}</p>
         </div>
         <div className="text-right">

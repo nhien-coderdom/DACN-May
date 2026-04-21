@@ -83,11 +83,11 @@ export default function Login() {
         login(user, access_token)
         navigate("/StaffDashboard")
       } else {
-        alert("You don't have permission to access admin panel")
+        alert("Bạn không có quyền truy cập bảng điều khiển quản trị viên")
         auth.signOut()
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || err.message || "Mã OTP Không chính xác hoặc hết hạn")
+      alert(err.response?.data?.message || err.message || "Mã OTP không chính xác hoặc hết hạn")
     } finally {
       setLoading(false)
     }
@@ -98,7 +98,7 @@ export default function Login() {
       <div className="w-[360px] space-y-6 rounded-xl border bg-white p-6 shadow-sm">
 
         <div className="text-center">
-          <h1 className="text-2xl font-semibold">Admin Login</h1>
+          <h1 className="text-2xl font-semibold">Đăng nhập Admin</h1>
           <p className="text-sm text-muted-foreground mt-2">
             Xác thực bằng số điện thoại
           </p>

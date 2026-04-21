@@ -30,10 +30,10 @@ export const CategoriesList = () => {
     })
   }, [data, searchTerm])
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <p>Đang tải...</p>
 
   const handleDelete = (id: number) => {
-    if (confirm('Delete this category?')) {
+    if (confirm('Xóa danh mục này?')) {
       deleteCategory(id)
     }
   }
@@ -61,12 +61,12 @@ export const CategoriesList = () => {
     <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Categories</h1>
+        <h1 className="text-2xl font-bold">Danh mục</h1>
         <button
           onClick={handleCreate}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          + Add Category
+          + Thêm danh mục
         </button>
       </div>
 
@@ -74,14 +74,14 @@ export const CategoriesList = () => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search by name or slug..."
+          placeholder="Tìm kiếm theo tên hoặc slug..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {searchTerm && (
           <p className="text-sm text-gray-600 mt-2">
-            Found {filteredData.length} result{filteredData.length !== 1 ? 's' : ''} for "{searchTerm}"
+            Tìm thấy {filteredData.length} kết quả cho "{searchTerm}"
           </p>
         )}
       </div>
@@ -92,9 +92,9 @@ export const CategoriesList = () => {
           <thead>
             <tr className="bg-gray-100 border-b">
               <th className="px-6 py-3 text-left text-sm font-semibold">#</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Tên</th>
               <th className="px-6 py-3 text-left text-sm font-semibold">Slug</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold">Actions</th>
+              <th className="px-6 py-3 text-center text-sm font-semibold">Hành Động</th>
             </tr>
           </thead>
           <tbody>
@@ -115,13 +115,13 @@ export const CategoriesList = () => {
                       onClick={() => handleEdit(cat)}
                       className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
                     >
-                      Edit
+                      Chỉnh sửa
                     </button>
                     <button
                       onClick={() => handleDelete(cat.id)}
                       className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
                     >
-                      Delete
+                      Xóa
                     </button>
                   </td>
                 </tr>

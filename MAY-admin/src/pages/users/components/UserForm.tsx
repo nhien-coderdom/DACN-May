@@ -64,7 +64,7 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-bold mb-4">
-        {initialData ? 'Edit User Info' : 'Create New User'}
+        {initialData ? 'Chỉnh sửa Người dùng' : 'Tạo Người dùng Mới'}
       </h2>
 
       <div>
@@ -81,7 +81,7 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Name *</label>
+        <label className="block text-sm font-medium mb-1">Tên *</label>
         <input
           type="text"
           name="name"
@@ -93,7 +93,7 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Phone *</label>
+        <label className="block text-sm font-medium mb-1">Số điện thoại *</label>
         <input
           type="text"
           name="phone"
@@ -105,13 +105,13 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
         />
         <p className="text-xs text-gray-500 mt-1">
           {initialData 
-            ? '9-10 digits (with or without leading 0)' 
-            : 'Exactly 10 digits - MUST START WITH 0 (e.g., 0912345678)'}
+            ? '9-10 chữ số (có hoặc không có số 0 ở đầu)' 
+            : 'Chính xác 10 chữ số - PHẢI BẮT ĐẦU BẰNG 0 (ví dụ: 0912345678)'}
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Address</label>
+        <label className="block text-sm font-medium mb-1">Địa chỉ</label>
         <textarea
           name="address"
           value={formData.address}
@@ -124,7 +124,7 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
       {!initialData && (
         <>
           <div>
-            <label className="block text-sm font-medium mb-1">Role</label>
+            <label className="block text-sm font-medium mb-1">Vai trò</label>
             <select
               name="role"
               value={formData.role}
@@ -144,13 +144,13 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onClo
           onClick={onClose}
           className="px-4 py-2 border rounded hover:bg-gray-50"
         >
-          Cancel
+          Hủy
         </button>
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          {initialData ? 'Update' : 'Create'}
+          {initialData ? 'Cập nhật' : 'Tạo mới'}
         </button>
       </div>
     </form>

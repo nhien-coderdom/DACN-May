@@ -24,7 +24,7 @@ interface OrderStatsCardsProps {
 export const OrderStatsCards: React.FC<OrderStatsCardsProps> = ({ data }) => {
   const cards = [
     {
-      title: 'Completed',
+      title: 'Hoàn thành',
       value: data.summary.completed,
       total: data.total,
       bgColor: 'bg-green-50',
@@ -33,7 +33,7 @@ export const OrderStatsCards: React.FC<OrderStatsCardsProps> = ({ data }) => {
       icon: '✓',
     },
     {
-      title: 'Cancelled',
+      title: 'Đã hủy',
       value: data.summary.cancelled,
       total: data.total,
       bgColor: 'bg-red-50',
@@ -42,7 +42,7 @@ export const OrderStatsCards: React.FC<OrderStatsCardsProps> = ({ data }) => {
       icon: '✕',
     },
     {
-      title: 'Pending',
+      title: 'Đang chờ',
       value: data.summary.pending,
       total: data.total,
       bgColor: 'bg-yellow-50',

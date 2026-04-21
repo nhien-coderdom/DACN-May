@@ -32,11 +32,11 @@ export const ToppingsList = () => {
   }, [data, searchTerm])
 
   //  XỬ LÝ LOADING STATE
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <p>Đang tải...</p>
 
   //  HÀM DELETE - Xóa topping
   const handleDelete = (id: number) => {
-    if (confirm('Delete this topping?')) {
+    if (confirm('Xóa topping này?')) {
       deleteTopping(id)
     }
   }
@@ -70,12 +70,12 @@ export const ToppingsList = () => {
     <div className="p-6">
       {/* =================== HEADER =================== */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Toppings</h1>
+        <h1 className="text-2xl font-bold">Topping</h1>
         <button
           onClick={handleCreate}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          + Add Topping
+          + Thêm Topping
         </button>
       </div>
 
@@ -83,14 +83,14 @@ export const ToppingsList = () => {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search by name..."
+          placeholder="Tìm kiếm theo tên..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {searchTerm && (
           <p className="text-sm text-gray-600 mt-2">
-            Found {filteredData.length} result{filteredData.length !== 1 ? 's' : ''} for "{searchTerm}"
+            Tìm thấy {filteredData.length} kết quả cho "{searchTerm}"
           </p>
         )}
       </div>
@@ -101,9 +101,9 @@ export const ToppingsList = () => {
           <thead>
             <tr className="bg-gray-100 border-b">
               <th className="px-6 py-3 text-left text-sm font-semibold">#</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Price</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold">Actions</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Tên</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold">Giá</th>
+              <th className="px-6 py-3 text-center text-sm font-semibold">Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -111,7 +111,7 @@ export const ToppingsList = () => {
             {filteredData.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                  {searchTerm ? `No toppings found matching "${searchTerm}"` : 'No toppings yet'}
+                  {searchTerm ? `Không tìm thấy topping nào phù hợp với "${searchTerm}"` : 'Chưa có topping nào'}
                 </td>
               </tr>
             ) : (
@@ -133,7 +133,7 @@ export const ToppingsList = () => {
                       onClick={() => handleEdit(topping)}
                       className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
                     >
-                      Edit
+                      Chỉnh sửa
                     </button>
                     
                     {/* Nút Delete */}
@@ -141,7 +141,7 @@ export const ToppingsList = () => {
                       onClick={() => handleDelete(topping.id)}
                       className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
                     >
-                      Delete
+                      Xóa
                     </button>
                   </td>
                 </tr>
