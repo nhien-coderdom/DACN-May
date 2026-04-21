@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { FiTrash2, FiMinus, FiPlus, FiShoppingBag } from "react-icons/fi";
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
+import PersonalizedProducts from "../components/PersonalizedProducts";
+
 
 function Cart() {
   const navigate = useNavigate();
@@ -45,7 +47,9 @@ function Cart() {
           >
             Tiếp tục mua sắm
           </button>
+
         </div>
+
       ) : (
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-4">
@@ -165,6 +169,7 @@ function Cart() {
           </div>
         </div>
       )}
+      {user && <PersonalizedProducts />}
     </div>
   );
 }
