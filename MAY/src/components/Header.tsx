@@ -71,7 +71,7 @@ function Header() {
                   : "px-4 py-1 text-neutral-700 hover:text-neutral-900 hover:bg-orange-50 rounded-full transition-all duration-300 hover:scale-105"
               }
             >
-              Giỏ hàng
+              Giỏ hàng x
             </NavLink>
 
           </div>
