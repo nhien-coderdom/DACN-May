@@ -1,5 +1,3 @@
-import { FiUser, FiMail, FiPhone, FiX } from 'react-icons/fi';
-
 interface RegisterFormProps {
   formData: {
     fullName: string;

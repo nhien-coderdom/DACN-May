@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 import { useAuth } from "../../contexts/AuthContext";
@@ -29,41 +29,56 @@ const getAddressStorageKey = (userId?: number) =>
     ? `${ADDRESS_STORAGE_PREFIX}_user_${userId}`
     : `${ADDRESS_STORAGE_PREFIX}_guest`;
 
+// Helper function to get default profile data
+const getProfileDefaults = (profileData: any, user: any) => ({
+  fullName: profileData?.name || user?.name || "",
+  email: profileData?.email || user?.email || "",
+  phone: profileData?.phone || user?.phone || "",
+  address: profileData?.address || user?.address || "",
+});
+
 const mapProfileAddressToSavedAddresses = (
   rawAddress: string,
   fallbackContact: { fullName: string; email: string; phone: string }
 ): SavedAddress[] => {
   const safeAddress = rawAddress.trim();
+  console.log("🔍 mapProfileAddressToSavedAddresses called with:", {
+    rawAddress,
+    safeAddress,
+    startsWithPrefix: safeAddress.startsWith(ADDRESS_BOOK_PREFIX),
+    ADDRESS_BOOK_PREFIX,
+  });
+
   if (!safeAddress) return [];
 
   if (!safeAddress.startsWith(ADDRESS_BOOK_PREFIX)) {
+    console.log("✅ Plain address (no prefix), returning:", safeAddress);
     return [
       {
         id: "profile-seed-0",
         ...fallbackContact,
         address: safeAddress,
-        city: "",
-        district: "",
-        ward: "",
         isDefault: true,
       },
     ];
   }
 
+  console.log("🔄 Address has prefix, parsing JSON...");
   try {
     const payload = JSON.parse(safeAddress.slice(ADDRESS_BOOK_PREFIX.length)) as {
       selectedAddressId?: string | null;
       addresses?: Array<{
         id?: string;
         address?: string;
-        city?: string;
-        district?: string;
-        ward?: string;
+        email?: string;
         isDefault?: boolean;
       }>;
     };
 
+    console.log("✅ Parsed JSON payload:", payload);
+
     if (!Array.isArray(payload.addresses) || payload.addresses.length === 0) {
+      console.log("❌ No addresses in payload");
       return [];
     }
 
@@ -73,11 +88,10 @@ const mapProfileAddressToSavedAddresses = (
         id: item.id || `profile-seed-${index}`,
         ...fallbackContact,
         address: (item.address || "").trim(),
-        city: item.city || "",
-        district: item.district || "",
-        ward: item.ward || "",
         isDefault: Boolean(item.isDefault),
       }));
+
+    console.log("📍 Normalized addresses:", normalized);
 
     if (normalized.length === 0) return [];
 
@@ -86,19 +100,19 @@ const mapProfileAddressToSavedAddresses = (
       normalized.find((item) => item.isDefault)?.id ||
       normalized[0].id;
 
-    return normalized.map((item) => ({
+    const result = normalized.map((item) => ({
       ...item,
       isDefault: item.id === selectedId,
     }));
-  } catch {
+    console.log("✅ Final result:", result);
+    return result;
+  } catch (error) {
+    console.log("⚠️ JSON parse failed, returning plain address:", safeAddress, error);
     return [
       {
         id: "profile-seed-0",
         ...fallbackContact,
         address: safeAddress,
-        city: "",
-        district: "",
-        ward: "",
         isDefault: true,
       },
     ];
@@ -113,7 +127,6 @@ export function useCheckout() {
   const token = localStorage.getItem("access_token");
   const { data: profileData, isLoading: isProfileLoading } = useProfile(token);
   const addressStorageKey = getAddressStorageKey(user?.id);
-  const hydratedStorageKeyRef = useRef<string | null>(null);
 
   const [step, setStep] = useState<CheckoutStep>(1);
   const [usePointsAmount, setUsePointsAmount] = useState(0);
@@ -125,96 +138,110 @@ export function useCheckout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<CheckoutFormData>({
-    fullName: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    address: "",
-    city: "",
-    district: "",
-    ward: "",
+    fullName: profileData?.name || user?.name || "",
+    email: profileData?.email || user?.email || "",
+    phone: profileData?.phone || user?.phone || "",
+    address: profileData?.address || user?.address || "",
     notes: "",
     paymentMethod: "cod",
   });
 
   useEffect(() => {
-    if (!user) return;
-    if (hydratedStorageKeyRef.current === addressStorageKey) return;
+    if (!user || !token) {
+      console.log("⏭️ Skipping address load - no user or token");
+      return;
+    }
 
     try {
+      console.log("📍 Loading addresses for user:", user.name, "profileLoading:", isProfileLoading);
+
       const raw = localStorage.getItem(addressStorageKey);
       const parsed = raw ? (JSON.parse(raw) as SavedAddress[]) : [];
       const loaded = Array.isArray(parsed) ? parsed : [];
 
-      let initialAddresses = loaded;
-      if (initialAddresses.length === 0 && isProfileLoading) {
-        return;
-      }
-
-      if (initialAddresses.length === 0 && profileData?.address) {
-        initialAddresses = mapProfileAddressToSavedAddresses(profileData.address, {
-          fullName: profileData.name || user.name || "",
-          email: profileData.email || user.email || "",
-          phone: profileData.phone || user.phone || "",
-        });
-      }
-
-      setSavedAddresses(initialAddresses);
-
-      if (initialAddresses.length === 0) {
-        setSelectedAddressId(null);
-        setIsAddingNewAddress(true);
+      // Case 1: Have saved addresses in localStorage
+      if (loaded.length > 0) {
+        console.log("✅ Using addresses from localStorage:", loaded);
+        setSavedAddresses(loaded);
+        const defaultAddress =
+          loaded.find((address) => address.isDefault) || loaded[0];
+        setSelectedAddressId(defaultAddress.id);
+        setIsAddingNewAddress(false);
         setEditingAddressId(null);
         setSetAsDefaultAddress(false);
         setFormData((prev) => ({
           ...prev,
-          fullName: user?.name || "",
-          email: user?.email || "",
-          phone: user?.phone || "",
-          address: "",
-          city: "",
-          district: "",
-          ward: "",
+          fullName: profileData?.name || defaultAddress.fullName,
+          email: profileData?.email || defaultAddress.email,
+          phone: profileData?.phone || defaultAddress.phone,
+          address: defaultAddress.address,
         }));
         return;
       }
 
-      const defaultAddress =
-        initialAddresses.find((address) => address.isDefault) || initialAddresses[0];
-      setSelectedAddressId(defaultAddress.id);
-      setIsAddingNewAddress(false);
+      // Case 2: Still waiting for profile to load
+      if (isProfileLoading) {
+        console.log("⏳ Still loading profile, waiting...");
+        return;
+      }
+
+      // Case 3: Profile loaded, extract address
+      if (profileData?.address) {
+        console.log("📍 Full profile data received:", {
+          name: profileData.name,
+          email: profileData.email,
+          phone: profileData.phone,
+          address: profileData.address,
+          addressLength: profileData.address?.length,
+        });
+        const mappedAddresses = mapProfileAddressToSavedAddresses(
+          profileData.address,
+          {
+            fullName: profileData.name || user.name || "",
+            email: profileData.email || user.email || "",
+            phone: profileData.phone || user.phone || "",
+          }
+        );
+        console.log("✅ Mapped addresses:", mappedAddresses);
+
+        if (mappedAddresses.length > 0) {
+          setSavedAddresses(mappedAddresses);
+          const defaultAddress =
+            mappedAddresses.find((address) => address.isDefault) ||
+            mappedAddresses[0];
+          setSelectedAddressId(defaultAddress.id);
+          setIsAddingNewAddress(false);
+          setEditingAddressId(null);
+          setSetAsDefaultAddress(false);
+          setFormData((prev) => ({
+            ...prev,
+            fullName: profileData?.name || defaultAddress.fullName,
+            email: profileData?.email || defaultAddress.email,
+            phone: profileData?.phone || defaultAddress.phone,
+            address: defaultAddress.address,
+          }));
+          return;
+        }
+      }
+
+      // Case 4: No addresses anywhere
+      console.log("❌ No addresses found - start new address input");
+      setSavedAddresses([]);
+      setSelectedAddressId(null);
+      setIsAddingNewAddress(true);
       setEditingAddressId(null);
       setSetAsDefaultAddress(false);
       setFormData((prev) => ({
         ...prev,
-        fullName: defaultAddress.fullName,
-        email: defaultAddress.email,
-        phone: defaultAddress.phone,
-        address: defaultAddress.address,
-        city: defaultAddress.city,
-        district: defaultAddress.district,
-        ward: defaultAddress.ward,
+        ...getProfileDefaults(profileData, user),
       }));
-      hydratedStorageKeyRef.current = addressStorageKey;
     } catch (error) {
-      console.error("Failed to load saved addresses:", error);
+      console.error("❌ Error loading addresses:", error);
       setSavedAddresses([]);
       setSelectedAddressId(null);
       setIsAddingNewAddress(true);
-      hydratedStorageKeyRef.current = addressStorageKey;
     }
-  }, [
-    addressStorageKey,
-    isProfileLoading,
-    profileData?.address,
-    profileData?.email,
-    profileData?.name,
-    profileData?.phone,
-    user?.email,
-    user?.id,
-    user?.name,
-    user?.phone,
-    user,
-  ]);
+  }, [addressStorageKey, user?.id, token, isProfileLoading, profileData?.address]);
 
   useEffect(() => {
     try {
@@ -223,6 +250,51 @@ export function useCheckout() {
       console.error("Failed to save addresses:", error);
     }
   }, [addressStorageKey, savedAddresses]);
+
+  // Update form data when selected address changes - ensure default address gets latest profile data
+  useEffect(() => {
+    if (!selectedAddressId || isAddingNewAddress || editingAddressId) return;
+
+    const selected = savedAddresses.find((address) => address.id === selectedAddressId);
+    if (!selected) return;
+
+    // Merge selected address with latest profile data
+    setFormData((prev) => ({
+      ...prev,
+      fullName: profileData?.name || selected.fullName || prev.fullName,
+      email: profileData?.email || selected.email || prev.email,
+      phone: profileData?.phone || selected.phone || prev.phone,
+      address: selected.address || prev.address,
+    }));
+  }, [selectedAddressId, savedAddresses, profileData, isAddingNewAddress, editingAddressId]);
+
+  // Update form data when profile data loads from API
+  useEffect(() => {
+    if (!profileData || isProfileLoading) return;
+    
+    // Update formData with complete profile data from API
+    setFormData((prev) => ({
+      ...prev,
+      fullName: profileData.name || prev.fullName || "",
+      email: profileData.email || prev.email || "",
+      phone: profileData.phone || prev.phone || "",
+      address: profileData.address || prev.address || "",
+    }));
+  }, [profileData, isProfileLoading]);
+
+  // Update saved addresses with latest profile data (name, email, phone)
+  useEffect(() => {
+    if (!profileData || savedAddresses.length === 0) return;
+
+    setSavedAddresses((prev) =>
+      prev.map((address) => ({
+        ...address,
+        fullName: profileData.name || address.fullName,
+        email: profileData.email || address.email,
+        phone: profileData.phone || address.phone,
+      }))
+    );
+  }, [profileData?.name, profileData?.email, profileData?.phone]);
 
   const subtotal = getTotalPrice();
 
@@ -255,15 +327,13 @@ export function useCheckout() {
     setSelectedAddressId(addressId);
     setIsAddingNewAddress(false);
     setEditingAddressId(null);
+    // Merge selected address with latest profile data
     setFormData((prev) => ({
       ...prev,
-      fullName: selected.fullName,
-      email: selected.email,
-      phone: selected.phone,
+      fullName: profileData?.name || selected.fullName,
+      email: profileData?.email || selected.email,
+      phone: profileData?.phone || selected.phone,
       address: selected.address,
-      city: selected.city,
-      district: selected.district,
-      ward: selected.ward,
     }));
   };
 
@@ -275,15 +345,13 @@ export function useCheckout() {
     setIsAddingNewAddress(true);
     setSelectedAddressId(addressId);
     setSetAsDefaultAddress(Boolean(selected.isDefault));
+    // Merge selected address with latest profile data when editing
     setFormData((prev) => ({
       ...prev,
-      fullName: selected.fullName,
-      email: selected.email,
-      phone: selected.phone,
+      fullName: profileData?.name || selected.fullName,
+      email: profileData?.email || selected.email,
+      phone: profileData?.phone || selected.phone,
       address: selected.address,
-      city: selected.city,
-      district: selected.district,
-      ward: selected.ward,
     }));
   };
 
@@ -298,13 +366,7 @@ export function useCheckout() {
         setSetAsDefaultAddress(false);
         setFormData((prevForm) => ({
           ...prevForm,
-          fullName: user?.name || "",
-          email: user?.email || "",
-          phone: user?.phone || "",
-          address: "",
-          city: "",
-          district: "",
-          ward: "",
+          ...getProfileDefaults(profileData, user),
         }));
         return next;
       }
@@ -321,9 +383,6 @@ export function useCheckout() {
           email: fallbackAddress.email,
           phone: fallbackAddress.phone,
           address: fallbackAddress.address,
-          city: fallbackAddress.city,
-          district: fallbackAddress.district,
-          ward: fallbackAddress.ward,
         }));
       }
 
@@ -338,13 +397,7 @@ export function useCheckout() {
     setSetAsDefaultAddress(savedAddresses.length === 0);
     setFormData((prev) => ({
       ...prev,
-      fullName: user?.name || "",
-      email: user?.email || "",
-      phone: user?.phone || "",
-      address: "",
-      city: "",
-      district: "",
-      ward: "",
+      ...getProfileDefaults(profileData, user),
     }));
   };
 
@@ -362,9 +415,6 @@ export function useCheckout() {
           email: selected.email,
           phone: selected.phone,
           address: selected.address,
-          city: selected.city,
-          district: selected.district,
-          ward: selected.ward,
         }));
       }
       return;
@@ -382,9 +432,6 @@ export function useCheckout() {
       email: formData.email,
       phone: formData.phone,
       address: formData.address,
-      city: formData.city,
-      district: formData.district,
-      ward: formData.ward,
       isDefault: setAsDefaultAddress,
     };
 

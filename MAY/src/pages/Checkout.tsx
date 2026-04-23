@@ -67,6 +67,8 @@ function Checkout() {
               <ShippingForm
                 userName={user?.name}
                 userPhone={user?.phone}
+                userEmail={user?.email}
+                userAddress={user?.address}
                 formData={formData}
                 savedAddresses={savedAddresses}
                 selectedAddressId={selectedAddressId}

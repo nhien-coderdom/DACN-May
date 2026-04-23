@@ -26,7 +26,7 @@ export const getPaymentMethodLabel = (method: PaymentMethod) => {
 };
 
 export const getFullAddress = (formData: CheckoutFormData) =>
-  [formData.address, formData.ward, formData.district, formData.city]
+  [formData.address]
     .map((value) => value.trim())
     .filter(Boolean)
     .join(", ");

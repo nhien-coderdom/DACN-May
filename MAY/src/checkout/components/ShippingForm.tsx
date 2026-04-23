@@ -1,22 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import type { CheckoutFormData, SavedAddress } from "../types/checkout.types";
-
-type DistrictOption = {
-  code: number;
-  name: string;
-};
-
-type WardOption = {
-  code: number;
-  name: string;
-};
-
-const HCM_CITY_NAME = "Thành phố Hồ Chí Minh";
-const HCM_CITY_CODE = 79;
 
 type Props = {
   userName?: string | null;
   userPhone?: string | null;
+  userEmail?: string | null;
+  userAddress?: string | null;
   formData: CheckoutFormData;
   savedAddresses: SavedAddress[];
   selectedAddressId: string | null;
@@ -52,93 +41,6 @@ export default function AddressSection({
   onToggleDefault,
 }: Props) {
   const [pendingDeleteAddressId, setPendingDeleteAddressId] = useState<string | null>(null);
-  const [districts, setDistricts] = useState<DistrictOption[]>([]);
-  const [wards, setWards] = useState<WardOption[]>([]);
-  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
-  const [isLoadingWards, setIsLoadingWards] = useState(false);
-
-  const emitInputChange = (name: "city" | "district" | "ward", value: string) => {
-    onInputChange({ target: { name, value } } as React.ChangeEvent<HTMLSelectElement>);
-  };
-
-  useEffect(() => {
-    if (!isAddingNewAddress) return;
-    if (formData.city === HCM_CITY_NAME) return;
-
-    emitInputChange("city", HCM_CITY_NAME);
-    if (formData.district) emitInputChange("district", "");
-    if (formData.ward) emitInputChange("ward", "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.city, formData.district, formData.ward, isAddingNewAddress]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchDistricts = async () => {
-      if (formData.city !== HCM_CITY_NAME) {
-        setDistricts([]);
-        setWards([]);
-        return;
-      }
-
-      try {
-        setIsLoadingDistricts(true);
-        const response = await fetch(`https://provinces.open-api.vn/api/p/${HCM_CITY_CODE}?depth=2`);
-        const data = (await response.json()) as { districts?: DistrictOption[] };
-        if (!isMounted) return;
-        setDistricts(Array.isArray(data?.districts) ? data.districts : []);
-      } catch {
-        if (!isMounted) return;
-        setDistricts([]);
-      } finally {
-        if (isMounted) setIsLoadingDistricts(false);
-      }
-    };
-
-    fetchDistricts();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [formData.city]);
-
-  const selectedDistrict = useMemo(
-    () => districts.find((district) => district.name === formData.district) || null,
-    [districts, formData.district]
-  );
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchWards = async () => {
-      if (!selectedDistrict) {
-        setWards([]);
-        return;
-      }
-
-      try {
-        setIsLoadingWards(true);
-        const response = await fetch(
-          `https://provinces.open-api.vn/api/d/${selectedDistrict.code}?depth=2`
-        );
-        const data = (await response.json()) as { wards?: WardOption[] };
-        if (!isMounted) return;
-        setWards(Array.isArray(data?.wards) ? data.wards : []);
-      } catch {
-        if (!isMounted) return;
-        setWards([]);
-      } finally {
-        if (isMounted) setIsLoadingWards(false);
-      }
-    };
-
-    fetchWards();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedDistrict]);
-
   return (
     <>
       <div className="rounded-xl border border-orange-200 bg-white p-6 shadow-sm">
@@ -166,10 +68,11 @@ export default function AddressSection({
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-semibold text-neutral-900">{address.fullName}</p>
+                  <span className="text-sm text-neutral-600">{address.email}</span>
                   <span className="text-sm text-neutral-600">{address.phone}</span>
                 </div>
                 <p className="mt-1 text-sm text-neutral-600">
-                  {[address.address, address.ward, address.district, address.city]
+                  {[address.address]
                     .filter(Boolean)
                     .join(", ")}
                 </p>
@@ -276,72 +179,6 @@ export default function AddressSection({
               rows={3}
               className="mt-4 w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm"
             />
-
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
-              <select
-                name="ward"
-                value={formData.ward}
-                onChange={(e) => emitInputChange("ward", e.target.value)}
-                required
-                disabled={!formData.district || isLoadingWards}
-                className="rounded-lg border border-neutral-300 px-4 py-3 text-sm disabled:bg-neutral-100"
-              >
-                <option value="">
-                  {isLoadingWards
-                    ? "Đang tải phường/xã..."
-                    : formData.district
-                      ? "Chọn phường/xã"
-                      : "Chọn quận/huyện trước"}
-                </option>
-                {formData.ward && !wards.some((ward) => ward.name === formData.ward) && (
-                  <option value={formData.ward}>{formData.ward}</option>
-                )}
-                {wards.map((ward) => (
-                  <option key={ward.code} value={ward.name}>
-                    {ward.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                name="district"
-                value={formData.district}
-                onChange={(e) => {
-                  const nextDistrict = e.target.value;
-                  emitInputChange("district", nextDistrict);
-                  if (formData.ward) emitInputChange("ward", "");
-                }}
-                required
-                disabled={formData.city !== HCM_CITY_NAME || isLoadingDistricts}
-                className="rounded-lg border border-neutral-300 px-4 py-3 text-sm disabled:bg-neutral-100"
-              >
-                <option value="">
-                  {isLoadingDistricts
-                    ? "Đang tải quận/huyện..."
-                    : formData.city === HCM_CITY_NAME
-                      ? "Chọn quận/huyện"
-                      : "Chỉ hỗ trợ Thành phố Hồ Chí Minh"}
-                </option>
-                {formData.district &&
-                  !districts.some((district) => district.name === formData.district) && (
-                    <option value={formData.district}>{formData.district}</option>
-                  )}
-                {districts.map((district) => (
-                  <option key={district.code} value={district.name}>
-                    {district.name}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                name="city"
-                value={formData.city}
-                required
-                disabled
-                className="rounded-lg border border-neutral-300 px-4 py-3 text-sm disabled:bg-neutral-100"
-                placeholder="Thành phố"
-              />
-            </div>
 
             <div className="mt-4 flex justify-end">
               <button
