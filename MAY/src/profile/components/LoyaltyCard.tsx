@@ -119,7 +119,7 @@ function LoyaltyCard({ user, formatPrice }: LoyaltyCardProps) {
             <p className="text-sm mt-1">
               💰{" "}
               <span className="font-bold text-green-600">
-                10.000đ = 1.000 điểm
+                1.000đ = 1.000 điểm
               </span>
             </p>
           </div>
