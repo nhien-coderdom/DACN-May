@@ -63,3 +63,19 @@ export const useDeleteProduct = () => {
     },
   })
 }
+
+// toggle active
+export const useToggleActiveProduct = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: number) => productService.toggleActiveProduct(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || 'Failed to toggle product status'
+      alert(message)
+    },
+  })
+}

@@ -24,6 +24,18 @@ export class CategoriesController {
     return this.categoriesService.create(body);
   }
 
+  // � Admin routes (phải đứng trước :id routes)
+  @Get('admin/list')
+  findAllAdmin() {
+    return this.categoriesService.findAllAdmin();
+  }
+
+  @Get('admin/:id')
+  findOneAdmin(@Param('id') id: string) {
+    return this.categoriesService.findOneAdmin(Number(id));
+  }
+
+  // 👥 User routes
   @Get()
   findAll() {
     return this.categoriesService.findAll();
@@ -32,6 +44,11 @@ export class CategoriesController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(Number(id));
+  }
+
+  @Patch(':id/toggle-active')
+  toggleActive(@Param('id') id: string) {
+    return this.categoriesService.toggleActive(Number(id));
   }
 
   @Patch(':id')

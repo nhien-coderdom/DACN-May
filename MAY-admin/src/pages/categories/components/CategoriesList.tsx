@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 // call hooks
-import { useCategories, useDeleteCategory, useCreateCategory, useUpdateCategory } from '../hook' 
+import { useCategories, useDeleteCategory, useCreateCategory, useUpdateCategory, useToggleActiveCategory } from '../hook' 
 import { CategoryForm } from './CategoryForm'
 import type { Category, CreateCategoryDTO, UpdateCategoryDTO } from '../types'
 
@@ -8,6 +8,7 @@ export const CategoriesList = () => {
   const { data, isLoading } = useCategories()
   const { mutate: deleteCategory } = useDeleteCategory()
   const { mutate: createCategory } = useCreateCategory()
+  const { mutate: toggleActive } = useToggleActiveCategory()
 
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
@@ -100,7 +101,7 @@ export const CategoriesList = () => {
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                   {searchTerm ? `No categories found matching "${searchTerm}"` : 'No categories yet'}
                 </td>
               </tr>
@@ -110,7 +111,26 @@ export const CategoriesList = () => {
                   <td className="px-6 py-4 text-sm text-gray-700">{index + 1}</td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{cat.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{cat.slug}</td>
-                  <td className="px-6 py-4 text-sm flex gap-2 justify-center">
+                  <td className="px-6 py-4 text-sm text-center">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                      cat.isActive 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {cat.isActive ? '📺 Đang bán' : '🚫 Đã ẩn'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm flex gap-2 justify-center flex-wrap">
+                    <button
+                      onClick={() => toggleActive(cat.id)}
+                      className={`text-white px-3 py-1 rounded text-xs ${
+                        cat.isActive 
+                          ? 'bg-orange-500 hover:bg-orange-600' 
+                          : 'bg-green-500 hover:bg-green-600'
+                      }`}
+                    >
+                      {cat.isActive ? '🔓 Ẩn' : '🔓 Hiện'}
+                    </button>
                     <button
                       onClick={() => handleEdit(cat)}
                       className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"

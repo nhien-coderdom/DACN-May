@@ -11,6 +11,7 @@ export interface User {
     updatedAt : string
     deletedAt? : string | null
     isDeleted : boolean
+    isActive : boolean
     role : UserRole
     loyaltyPoint : number
     totalOrders : number

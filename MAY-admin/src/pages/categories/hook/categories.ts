@@ -64,3 +64,18 @@ export const useDeleteCategory = () => {
         }
     })
 }
+
+// toggle active
+export const useToggleActiveCategory = () => {
+    const queryClient = useQueryClient()
+    return useMutation ({
+        mutationFn: (id: number) => categoryService.toggleActiveCategory(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['categories'] })
+        },
+        onError: (error: any) => {
+            const message = error.response?.data?.message || error.message || 'Failed to toggle category status'
+            alert(message)
+        }
+    })
+}

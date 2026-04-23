@@ -47,6 +47,7 @@ export class ProductsService {
     return this.prisma.product.findMany({
       where: {
         isDeleted: false,
+        isActive: true, // ✅ Chỉ hiển thị sản phẩm đang bán
       },
       include: {
         category: true,
@@ -62,6 +63,56 @@ export class ProductsService {
     });
   }
 
+  // 🔥 Admin xem tất cả products (bao gồm cả ẩn)
+  async findAllAdmin() {
+    return this.prisma.product.findMany({
+      where: {
+        isDeleted: false, // ✅ Không xem những đã xóa thật
+      },
+      include: {
+        category: true,
+        toppings: {
+          include: {
+            topping: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  // 🔥 Toggle bật/tắt ẩn sản phẩm (Admin)
+  async toggleActive(id: number) {
+    // ✅ FIX: Check cả isDeleted để không cho toggle những product đã xóa thật
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id,
+        isDeleted: false,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Sản phẩm không tồn tại');
+    }
+
+    return this.prisma.product.update({
+      where: { id },
+      data: {
+        isActive: !product.isActive,
+      },
+      include: {
+        category: true,
+        toppings: {
+          include: {
+            topping: true,
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: number) {
     if (!id || isNaN(id)) {
       throw new BadRequestException('Invalid product id');
@@ -71,6 +122,33 @@ export class ProductsService {
       where: {
         id,
         isDeleted: false,
+        isActive: true, // ✅ Chỉ lấy sản phẩm đang bán
+      },
+      include: {
+        category: true,
+        toppings: {
+          include: { topping: true },
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Không tìm thấy product');
+    }
+
+    return product;
+  }
+
+  // 🔥 Admin xem chi tiết (cho phép xem cả ẩn)
+  async findOneAdmin(id: number) {
+    if (!id || isNaN(id)) {
+      throw new BadRequestException('Invalid product id');
+    }
+
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id,
+        isDeleted: false, // ✅ Không xem những đã xóa thật
       },
       include: {
         category: true,
@@ -88,7 +166,8 @@ export class ProductsService {
   }
 
   async update(id: number, data: UpdateProductDto) {
-    await this.findOne(id);
+    // ✅ FIX: Dùng findOneAdmin() tháy vì findOne() để admin có thể sửa product đang ẩn
+    await this.findOneAdmin(id);
 
     if (data.categoryId) {
       const category = await this.prisma.category.findFirst({
@@ -161,11 +240,12 @@ export class ProductsService {
     // 2. Lấy danh sách productId
     const productIds = result.map((item) => item.productId);
 
-    // 3. Query product (lọc isDeleted)
+    // 3. Query product (lọc isDeleted và isActive)
     const products = await this.prisma.product.findMany({
       where: {
         id: { in: productIds },
         isDeleted: false,
+        isActive: true, // ✅ Chỉ tính sản phẩm đang bán
       },
       include: {
         category: true,

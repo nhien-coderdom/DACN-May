@@ -3,13 +3,12 @@ export interface Category {
   name: string
   slug: string
   order: number
-
   parentId?: number | null
-
+  isActive: boolean
+  isDeleted: boolean
   createdAt: string
   updatedAt: string
   deletedAt?: string | null
-
   children?: Category[]
 }
 

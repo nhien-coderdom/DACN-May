@@ -25,7 +25,13 @@ export const updateProduct = async (id: number, data: UpdateProductDTO): Promise
   return response.data
 }
 
-// delete
+// delete (soft delete)
 export const deleteProduct = async (id: number): Promise<void> => {
   await axiosClient.delete(`/products/${id}`)
+}
+
+// toggle active
+export const toggleActiveProduct = async (id: number): Promise<Product> => {
+  const response = await axiosClient.patch<Product>(`/products/${id}/toggle-active`)
+  return response.data
 }

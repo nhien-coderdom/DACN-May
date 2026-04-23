@@ -2,6 +2,7 @@ export interface Topping {
   id: number
   name: string
   price: number
+  isActive: boolean
 }
 
 export interface CreateToppingDTO {

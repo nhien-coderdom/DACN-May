@@ -7,11 +7,33 @@ export class ToppingsService {
   constructor(
     private prisma: PrismaService, // định nghĩa prisma = object để query database => nestjs sẽ tự tạo và đưa vào
   ) {}
+
+  // 👥 User route - only active toppings
   async findAll() {
+    return this.prisma.topping.findMany({
+      where: {
+        isActive: true,
+      },
+    });
+  }
+
+  // 🔥 Admin route - all toppings
+  async findAllAdmin() {
     return this.prisma.topping.findMany();
   }
 
   async findOne(id: number) {
+    const topping = await this.prisma.topping.findUnique({
+      where: { id },
+    });
+    if (!topping) {
+      throw new Error('Topping not found');
+    }
+    return topping;
+  }
+
+  // 🔥 Admin route - detail with all toppings
+  async findOneAdmin(id: number) {
     const topping = await this.prisma.topping.findUnique({
       where: { id },
     });
@@ -26,6 +48,7 @@ export class ToppingsService {
       data: {
         name: data.name,
         price: data.price,
+        isActive: true,
       },
     });
   }
@@ -37,6 +60,24 @@ export class ToppingsService {
     return this.prisma.topping.update({
       where: { id },
       data,
+    });
+  }
+
+  // 🔥 Toggle active
+  async toggleActive(id: number) {
+    const topping = await this.prisma.topping.findUnique({
+      where: { id },
+    });
+
+    if (!topping) {
+      throw new Error('Topping not found');
+    }
+
+    return this.prisma.topping.update({
+      where: { id },
+      data: {
+        isActive: !topping.isActive,
+      },
     });
   }
 

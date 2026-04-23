@@ -86,4 +86,36 @@ export const useUpdateUserRole = () => {
         }
     })
 }
+
+// deactivate account
+export const useDeactivateUser = () => {
+    const queryClient = useQueryClient()
+    return useMutation ({
+        mutationFn: (id: number) => usersService.deactivateUser(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] })
+            alert('  User deactivated successfully!')
+        },
+        onError: (error: any) => {
+            const message = error.response?.data?.message || error.message || 'Failed to deactivate user'
+            alert(`  Error: ${message}`)
+        }
+    })
+}
+
+// activate account
+export const useActivateUser = () => {
+    const queryClient = useQueryClient()
+    return useMutation ({
+        mutationFn: (id: number) => usersService.activateUser(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] })
+            alert('  User activated successfully!')
+        },
+        onError: (error: any) => {
+            const message = error.response?.data?.message || error.message || 'Failed to activate user'
+            alert(`  Error: ${message}`)
+        }
+    })
+}
     

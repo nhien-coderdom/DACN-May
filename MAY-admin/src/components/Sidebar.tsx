@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Tag, Coffee, ShoppingCart, Users, Package, TrendingUp } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, Tag, Coffee, ShoppingCart, Users, Package, TrendingUp, LogOut } from 'lucide-react'
+import { useAuthStore } from '@/pages/auth/stores/authStore'
 
 interface NavItem {
   label: string
@@ -56,16 +57,23 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, logout } = useAuthStore()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
-    <aside className="w-64 border-r border-gray-200 bg-white h-screen sticky top-0">
+    <aside className="w-64 border-r border-gray-200 bg-white h-screen sticky top-0 flex flex-col">
       {/* Logo */}
       <div className="p-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-primary">MAY </h1>
       </div>
 
       {/* Navigation */}
-      <nav className="p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
           const isDisabled = item.status === 'soon'
@@ -95,6 +103,23 @@ export default function Sidebar() {
           )
         })}
       </nav>
+
+      {/* User Info & Logout */}
+      <div className="border-t border-gray-200 bg-white p-4">
+        {user && (
+          <div className="mb-3 px-2">
+            <p className="text-sm font-semibold text-gray-900">{user.name || user.email}</p>
+            <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+          </div>
+        )}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors font-medium"
+        >
+          <LogOut size={20} />
+          <span>Đăng Xuất</span>
+        </button>
+      </div>
     </aside>
   )
 }

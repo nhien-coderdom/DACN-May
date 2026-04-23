@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useToppings, useDeleteTopping, useCreateTopping, useUpdateTopping } from '../hook'
+import { useToppings, useDeleteTopping, useCreateTopping, useUpdateTopping, useToggleActiveTopping } from '../hook'
 import { ToppingForm } from './ToppingForm'
 import type { Topping, CreateToppingDTO, UpdateToppingDTO } from '../types'
 
@@ -8,6 +8,7 @@ export const ToppingsList = () => {
   const { data, isLoading } = useToppings()
   const { mutate: deleteTopping } = useDeleteTopping()
   const { mutate: createTopping } = useCreateTopping()
+  const { mutate: toggleActive } = useToggleActiveTopping()
 
   //  STATE QUẢN LÝ MODAL & FORM
   const [open, setOpen] = useState(false)
@@ -103,7 +104,7 @@ export const ToppingsList = () => {
               <th className="px-6 py-3 text-left text-sm font-semibold">#</th>
               <th className="px-6 py-3 text-left text-sm font-semibold">Tên</th>
               <th className="px-6 py-3 text-left text-sm font-semibold">Giá</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold">Hành động</th>
+              <th className="px-6 py-3 text-center text-sm font-semibold">Hành Động</th>
             </tr>
           </thead>
           <tbody>
@@ -126,8 +127,31 @@ export const ToppingsList = () => {
                   {/* Cột Price: giá */}
                   <td className="px-6 py-4 text-sm text-gray-600">${topping.price}</td>
                   
-                  {/* Cột Actions: 2 nút Edit và Delete */}
-                  <td className="px-6 py-4 text-sm flex gap-2 justify-center">
+                  {/* Cột Status: isActive status */}
+                  <td className="px-6 py-4 text-sm text-center">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                      topping.isActive 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {topping.isActive ? '📺 Đang bán' : '🚫 Đã ẩn'}
+                    </span>
+                  </td>
+                  
+                  {/* Cột Actions: Toggle, Edit, Delete buttons */}
+                  <td className="px-6 py-4 text-sm flex gap-2 justify-center flex-wrap">
+                    {/* Nút Toggle Active */}
+                    <button
+                      onClick={() => toggleActive(topping.id)}
+                      className={`text-white px-3 py-1 rounded text-xs ${
+                        topping.isActive 
+                          ? 'bg-orange-500 hover:bg-orange-600' 
+                          : 'bg-green-500 hover:bg-green-600'
+                      }`}
+                    >
+                      {topping.isActive ? '🔓 Ẩn' : '🔓 Hiện'}
+                    </button>
+
                     {/* Nút Edit */}
                     <button
                       onClick={() => handleEdit(topping)}

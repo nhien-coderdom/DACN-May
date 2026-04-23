@@ -80,6 +80,27 @@ export class UsersController {
     return this.usersService.restoreProfile(Number(id));
   }
 
+  // 🔥 Khóa tài khoản (set isActive = false)
+  @Patch(':id/deactivate')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
+  deactivateAccount(@Param('id') id: string, @Req() req: any) {
+    const targetUserId = Number(id);
+    // Rule: Cannot deactivate yourself
+    if (req.user.id === targetUserId) {
+      throw new ForbiddenException('Cannot deactivate your own account');
+    }
+    return this.usersService.deactivateAccount(targetUserId);
+  }
+
+  // 🔥 Kích hoạt tài khoản (set isActive = true)
+  @Patch(':id/activate')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
+  activateAccount(@Param('id') id: string) {
+    return this.usersService.activateAccount(Number(id));
+  }
+
   @Get(':id/loyalty')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.STAFF)

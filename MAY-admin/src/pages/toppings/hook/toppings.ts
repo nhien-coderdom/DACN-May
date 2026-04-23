@@ -42,7 +42,7 @@ export const useDeleteTopping = () => {
             queryClient.invalidateQueries({ queryKey: ['toppings'] })
         },
         onError: (error: any) => {
-            const message = error.response?.data?.message || error.message || 'Failed to delete category'
+            const message = error.response?.data?.message || error.message || 'Failed to delete topping'
             alert(message)
         }
     })
@@ -61,8 +61,23 @@ export const useUpdateTopping = (id: number) => {
 
         },
         onError: (error: any) => {
-            const message = error.response?.data?.message || error.message || 'Failed to update category'
+            const message = error.response?.data?.message || error.message || 'Failed to update topping'
             alert(message)
         }
     })  
+}
+
+// toggle active
+export const useToggleActiveTopping = () => {
+    const queryClient = useQueryClient()
+    return useMutation ({
+        mutationFn: (id: number) => Toppings.toggleActiveTopping(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['toppings'] })
+        },
+        onError: (error: any) => {
+            const message = error.response?.data?.message || error.message || 'Failed to toggle topping status'
+            alert(message)
+        }
+    })
 }

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useProducts, useDeleteProduct, useCreateProduct, useUpdateProduct } from '../hook'
+import { useProducts, useDeleteProduct, useCreateProduct, useUpdateProduct, useToggleActiveProduct } from '../hook'
 import { ProductForm } from './ProductForm'
 import type { Product, CreateProductDTO, UpdateProductDTO } from '../types'
 
@@ -8,6 +8,7 @@ export const ProductsList = () => {
   const { data, isLoading } = useProducts()
   const { mutate: deleteProduct } = useDeleteProduct()
   const { mutate: createProduct } = useCreateProduct()
+  const { mutate: toggleActive } = useToggleActiveProduct()
 
   // 2️⃣ STATE QUẢN LÝ MODAL & FORM
   const [open, setOpen] = useState(false)
@@ -111,7 +112,7 @@ export const ProductsList = () => {
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                   {searchTerm ? `Không tìm thấy sản phẩm nào phù hợp với "${searchTerm}"` : 'Chưa có sản phẩm nào'}
                 </td>
               </tr>
@@ -136,7 +137,26 @@ export const ProductsList = () => {
                       <span className="text-gray-400">Không có hình ảnh</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm flex gap-2 justify-center">
+                  <td className="px-6 py-4 text-sm text-center">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                      product.isActive 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {product.isActive ? '📺 Đang bán' : '🚫 Đã ẩn'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm flex gap-2 justify-center flex-wrap">
+                    <button
+                      onClick={() => toggleActive(product.id)}
+                      className={`text-white px-3 py-1 rounded text-xs ${
+                        product.isActive 
+                          ? 'bg-orange-500 hover:bg-orange-600' 
+                          : 'bg-green-500 hover:bg-green-600'
+                      }`}
+                    >
+                      {product.isActive ? '🔓 Ẩn' : '🔓 Hiện'}
+                    </button>
                     <button
                       onClick={() => handleEdit(product)}
                       className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"

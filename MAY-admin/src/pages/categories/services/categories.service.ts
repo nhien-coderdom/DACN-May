@@ -4,9 +4,9 @@ import type { Category, CreateCategoryDTO, UpdateCategoryDTO } from '../types'
 
 // ui (FE - may-admin) - service (Axios) - api (BE) -> prisma -> database
 
-// get
+// get (admin - show all including hidden)
 export const getCategories = async (): Promise<Category[]> => {
-    const response = await axiosClient.get<Category[]>('/categories')
+    const response = await axiosClient.get<Category[]>('/categories/admin/list')
     return response.data
 }
 
@@ -28,7 +28,13 @@ export const updateCategory = async (id: number, data: UpdateCategoryDTO): Promi
     return response.data
 }
 
-// delete
+// delete (soft delete)
 export const deleteCategory = async (id: number): Promise<void> => {
     await axiosClient.delete(`/categories/${id}`)
+}
+
+// toggle active
+export const toggleActiveCategory = async (id: number): Promise<any> => {
+    const response = await axiosClient.patch(`/categories/${id}/toggle-active`)
+    return response.data
 }

@@ -17,6 +17,18 @@ import { UpdateToppingDto } from './dto/update-toppings.dto.js';
 export class ToppingsController {
   constructor(private toppingsService: ToppingsService) {}
 
+  // 🔥 Admin routes (phải đứng trước :id routes)
+  @Get('admin/list')
+  findAllAdmin() {
+    return this.toppingsService.findAllAdmin();
+  }
+
+  @Get('admin/:id')
+  findOneAdmin(@Param('id') id: string) {
+    return this.toppingsService.findOneAdmin(Number(id));
+  }
+
+  // 👥 User routes
   @Get()
   findAll() {
     return this.toppingsService.findAll();
@@ -30,6 +42,12 @@ export class ToppingsController {
   @Post()
   create(@Body() data: CreateToppingDto) {
     return this.toppingsService.create(data);
+  }
+
+  // toggle active
+  @Patch(':id/toggle-active')
+  toggleActive(@Param('id') id: string) {
+    return this.toppingsService.toggleActive(Number(id));
   }
 
   // update

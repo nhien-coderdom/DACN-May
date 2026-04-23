@@ -5,6 +5,8 @@ export interface Product {
   description?: string
   categoryId: number
   imageUrl?: string
+  isActive: boolean
+  isDeleted: boolean
   createdAt: string
   updatedAt: string
 }

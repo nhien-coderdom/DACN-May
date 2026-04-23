@@ -35,3 +35,15 @@ export const updateUserRole = async (id: number, data: UpdateUserRoleDTO): Promi
   const response = await axiosClient.patch<User>(`/users/${id}/role`, data)
   return response.data
 }
+
+// deactivate account
+export const deactivateUser = async (id: number): Promise<User> => {
+  const response = await axiosClient.patch<User>(`/users/${id}/deactivate`)
+  return response.data
+}
+
+// activate account
+export const activateUser = async (id: number): Promise<User> => {
+  const response = await axiosClient.patch<User>(`/users/${id}/activate`)
+  return response.data
+}

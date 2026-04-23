@@ -66,6 +66,38 @@ export class CategoriesService {
     return this.prisma.category.findMany({
       where: {
         isDeleted: false,
+        isActive: true, // ✅ Chỉ hiển thị danh mục đang kích hoạt
+      },
+      include: {
+        parent: {
+          where: {
+            isActive: true,
+          },
+        },
+        children: {
+          where: {
+            isDeleted: false,
+            isActive: true,
+          },
+        },
+        products: {
+          where: {
+            isDeleted: false,
+            isActive: true,
+          },
+        },
+      },
+      orderBy: {
+        order: 'asc',
+      },
+    });
+  }
+
+  // 🔥 Admin xem tất cả categories (bao gồm cả ẩn)
+  async findAllAdmin() {
+    return this.prisma.category.findMany({
+      where: {
+        isDeleted: false, // ✅ Không xem những đã xóa thật
       },
       include: {
         parent: true,
@@ -91,6 +123,42 @@ export class CategoriesService {
       where: {
         id,
         isDeleted: false,
+        isActive: true, // ✅ Chỉ lấy danh mục đang kích hoạt
+      },
+      include: {
+        parent: {
+          where: {
+            isActive: true,
+          },
+        },
+        children: {
+          where: {
+            isDeleted: false,
+            isActive: true,
+          },
+        },
+        products: {
+          where: {
+            isDeleted: false,
+            isActive: true,
+          },
+        },
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Không tìm thấy category');
+    }
+
+    return category;
+  }
+
+  // 🔥 Admin xem chi tiết (cho phép xem cả ẩn)
+  async findOneAdmin(id: number) {
+    const category = await this.prisma.category.findFirst({
+      where: {
+        id,
+        isDeleted: false, // ✅ Không xem những đã xóa thật
       },
       include: {
         parent: true,
@@ -114,6 +182,54 @@ export class CategoriesService {
     return category;
   }
 
+  // 🔥 Toggle bật/tắt ẩn danh mục (Admin)
+  async toggleActive(id: number) {
+    // ✅ FIX: Check cả isDeleted để không cho toggle những category đã xóa thật
+    const category = await this.prisma.category.findFirst({
+      where: {
+        id,
+        isDeleted: false,
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Danh mục không tồn tại');
+    }
+
+    // ✅ FIX: Nếu tắt category -> auto tắt hết product trong category đó
+    if (category.isActive) {
+      await this.prisma.product.updateMany({
+        where: {
+          categoryId: id,
+          isDeleted: false,
+        },
+        data: {
+          isActive: false,
+        },
+      });
+    }
+
+    return this.prisma.category.update({
+      where: { id },
+      data: {
+        isActive: !category.isActive,
+      },
+      include: {
+        parent: true,
+        children: {
+          where: {
+            isDeleted: false,
+          },
+        },
+        products: {
+          where: {
+            isDeleted: false,
+          },
+        },
+      },
+    });
+  }
+
   async update(
     id: number,
     data: {
@@ -123,7 +239,8 @@ export class CategoriesService {
       parentId?: number | null;
     },
   ) {
-    await this.findOne(id);
+    // ✅ FIX: Dùng findOneAdmin() tháy vì findOne() để admin có thể sửa category đang ẩn
+    await this.findOneAdmin(id);
 
     if (data.slug) {
       const existedSlug = await this.prisma.category.findFirst({

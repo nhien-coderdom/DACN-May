@@ -9,6 +9,8 @@ import {
   useUpdateUser,
   useDeleteUser,
   useUpdateUserRole,
+  useDeactivateUser,
+  useActivateUser,
 } from './hooks'
 import type { UpdateUserRoleDTO, CreateUserDTO, UpdateUserDTO, User } from './types'
 
@@ -21,6 +23,8 @@ const Users: React.FC = () => {
   const updateUserMutation = useUpdateUser()
   const deleteUserMutation = useDeleteUser()
   const updateUserRoleMutation = useUpdateUserRole()
+  const deactivateUserMutation = useDeactivateUser()
+  const activateUserMutation = useActivateUser()
 
   // Modal states
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -70,6 +74,18 @@ const Users: React.FC = () => {
   const handleUpdateRole = (userId: number, data: UpdateUserRoleDTO) => {
     updateUserRoleMutation.mutate({ id: userId, data })
     setRoleModalUser(null)
+  }
+
+  const handleDeactivateUser = (userId: number) => {
+    if (confirm('Bạn có chắc chắn muốn khóa tài khoản này?')) {
+      deactivateUserMutation.mutate(userId)
+    }
+  }
+
+  const handleActivateUser = (userId: number) => {
+    if (confirm('Bạn có chắc chắn muốn kích hoạt tài khoản này?')) {
+      activateUserMutation.mutate(userId)
+    }
   }
 
   return (
@@ -164,6 +180,8 @@ const Users: React.FC = () => {
             setRoleModalUser(user)
           }
         }}
+        onDeactivate={handleDeactivateUser}
+        onActivate={handleActivateUser}
         isLoading={isLoading}
       />
     </div>
